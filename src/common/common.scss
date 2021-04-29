@@ -1,0 +1,16 @@
+html, body, #app {
+    padding: 0;
+    margin: 0;
+    background-color: beige;
+    height: 100%;
+    width: 100%;
+}
+body {
+    position: relative;
+    .footer-desc {
+        color: #795548;
+        position: absolute;
+        bottom: 0;
+        padding: 15px;
+    }
+}
