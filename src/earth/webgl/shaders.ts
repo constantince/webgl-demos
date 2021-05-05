@@ -1,6 +1,7 @@
 export const VERTEX_SHADER = `#version 300 es
     in vec4 a_Position;
     in vec2 a_TexCoord;
+    out vec2 v_TexCoord;
     uniform mat4 u_WorldViewMatrix;
     uniform mat4 u_NormalMatrix;
 
@@ -11,7 +12,7 @@ export const VERTEX_SHADER = `#version 300 es
         gl_Position = u_WorldViewMatrix * a_Position;
         v_WorldVertex = u_NormalMatrix * a_Position;
         v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
-        //v_TexCoord = a_TexCoord;
+        v_TexCoord = a_TexCoord;
 
     }
 
@@ -28,28 +29,43 @@ export const FRAGMENT_SHADER = `#version 300 es
     uniform vec3 u_LightPosition;
     uniform vec3 u_LightColor;
 
+    uniform sampler2D u_Sampler;
+
+    uniform vec3 u_LightReflectPosition;
+    // 镜面反射因子
+    const float a = 64.0;
     void main() {
         //vec3 normalDirection = normalize(v_Normal);
 
-        vec3 lightDirection = normalize(u_LightPosition - v_WorldVertex.xyz);
+        vec3 lightDirection = normalize(u_LightReflectPosition - v_WorldVertex.xyz);
 
         float nDot = max(dot(lightDirection, v_Normal), 0.0);
 
         // 纹素
-        vec4 tex = vec4(1.0, 0.0, 0.0, 1.0);
+        vec4 tex = texture(u_Sampler, v_TexCoord);
 
-        //光的颜色
-        vec4 ambient = vec4(0.7, 0.7, 0.2, 1.0);
+        //环境光的颜色 A
+        vec3 ambient = vec3(0.1, 0.1, 0.1) * tex.rgb;
 
-        vec3 Light = u_LightColor + ambient.rgb;
+        //vec3 Light = u_LightColor + ambient.rgb;
 
-        //漫反射光
-        vec3 diffuse = tex.rgb * Light * nDot;
+        //漫反射光 D
+        vec3 diffuse = tex.rgb * u_LightColor * nDot;
 
-        // 环境光
+        vec3 reflection = normalize(reflect(lightDirection, v_Normal));
+        vec3 viewVectorEye = -v_WorldVertex.xyz;
+        // 反射光线与法线的点积 l * n * cos()
+        float sDot = max(dot(reflection, viewVectorEye), 0.0);
+        // 镜面放射光 S
+        float specularLightWeight = pow(sDot, a);
+
+        // 镜面光线
+        vec3 specularReflection =  tex.rgb * u_LightColor * specularLightWeight;
+
         
 
-        // 最终的颜色
-        outColor = vec4(diffuse, 1.0);
+        // 最终的片元
+        //outColor = tex;
+        outColor = vec4(diffuse + ambient + specularReflection, tex.a);
     }
 `;

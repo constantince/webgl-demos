@@ -8,7 +8,7 @@ type VertexObjectsBuffer = {
 
 type NormalAndTexCoord = {
     normal: Float32Array,
-    texcoord: Uint16Array
+    texcoord: Float32Array
 }
 
 function calculatePoints(): VertexObjectsBuffer {
@@ -43,9 +43,9 @@ function calculatePoints(): VertexObjectsBuffer {
 }
 
 export function calculateVertexSphere(RESOLUTION: number = 60, RADIUS: number = 1): VertexObjectsBuffer & NormalAndTexCoord {
-    const theta = (360 / RESOLUTION) * (Math.PI / 180);
+    const theta = (180 / RESOLUTION) * (Math.PI / 180); // 疑问 
     const beta = (360 / RESOLUTION) * (Math.PI / 180); 
-    let vertexs:number[] = [], pointer:number[] = [], normal:number[] = [];
+    let vertexs:number[] = [], pointer:number[] = [], normal:number[] = [], textures: number[] = [];
      for (let index = 0; index <= RESOLUTION; index++) {
          // 同等高度的Y值
         const y = Math.cos(theta * index);
@@ -56,12 +56,17 @@ export function calculateVertexSphere(RESOLUTION: number = 60, RADIUS: number = 
             const x = Math.cos(beta * index1) * d;
             // 斜边的正弦即是Z轴的距离
             const z = Math.sin(beta * index1) * d;
+
+            var u = 1 - (index1 / RESOLUTION);
+            var v = 1 - (index / RESOLUTION);
             vertexs.push(x * RADIUS);
             vertexs.push(y * RADIUS);
             vertexs.push(z * RADIUS);
             normal.push(x),
             normal.push(y);
             normal.push(z);
+            textures.push(u);
+            textures.push(v);
         }
      }
 
@@ -94,7 +99,7 @@ export function calculateVertexSphere(RESOLUTION: number = 60, RADIUS: number = 
         color: new Float32Array([]),
         len: pointer.length,
         normal: new Float32Array(normal),
-        texcoord: new Uint16Array([])
+        texcoord: new Float32Array(textures)
     };
 }
 

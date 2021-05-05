@@ -86,10 +86,71 @@ export function translateToWebglColor(color: string): number[] { // #19a397
     const result = [colors[0] / 255, colors[1] / 255, colors[2] / 255, colors[3]];
     return result;
 }
+
 const now = Date.now();
 export function rotation(beginAngle: number, secondPerAngle: number): number {
     let then = Date.now();
     const detla = then - now;
     let rotateAngle = beginAngle + (secondPerAngle * detla) / 1000;
     return rotateAngle %= 360;
+}
+
+type TEXTURE_ITEMS = {
+    program: WebGLProgram,
+    src: string
+}
+
+export function createTexture(gl:WebGL2RenderingContext, item: TEXTURE_ITEMS[]): Promise<WebGLTexture[]> {
+    const promises = item.map(v => 
+        loadImage(gl, v.program, v.src)
+    );
+    return Promise.all(promises);
+}
+
+
+function loadImage (gl:WebGL2RenderingContext, program:WebGLProgram,  src: string): Promise<WebGLTexture> {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = "anonymous";
+        image.src = src;
+        
+        image.onload = function() {
+            resolve(loadTexture(gl, program, image, gl.TEXTURE0));
+        }
+    });
+}
+
+function loadTexture(gl:WebGL2RenderingContext, program: WebGLProgram, image: TexImageSource, type: number): WebGLTexture {
+    gl.useProgram(program);
+    const texture = gl.createTexture();
+
+    gl.activeTexture(type);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    const samplerLocation = gl.getUniformLocation(program, "u_Sampler");
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+    
+
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); 
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    //     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); 
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);    
+    // gl.texParameteri(gl.TEXTURE_2D, gl.LINEAR_MIPMAP_LINEAR, gl.LINEAR);
+
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+    gl.generateMipmap(gl.TEXTURE_2D);
+    // gl.bindTexture(gl.TEXTURE_2D, null); // Unbind texture
+
+    
+    gl.uniform1i(samplerLocation, 0);
+
+    return <WebGLTexture>texture;
 }
