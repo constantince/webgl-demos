@@ -31,9 +31,11 @@ export const FRAGMENT_SHADER = `#version 300 es
 
     uniform sampler2D u_Sampler;
 
+    uniform vec3 u_SpectuarLightColor;
+
     uniform vec3 u_LightReflectPosition;
     // 镜面反射因子
-    const float a = 64.0;
+    const float a = 32.0;
     void main() {
         //vec3 normalDirection = normalize(v_Normal);
 
@@ -60,7 +62,7 @@ export const FRAGMENT_SHADER = `#version 300 es
         float specularLightWeight = pow(sDot, a);
 
         // 镜面光线
-        vec3 specularReflection =  tex.rgb * u_LightColor * specularLightWeight;
+        vec3 specularReflection =  u_SpectuarLightColor * specularLightWeight;
 
         
 

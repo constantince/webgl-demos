@@ -13,7 +13,7 @@ const App: React.FC = props => {
     }
 
     return <div className="container"> 
-        <Articles id="earht-sphere" main={main} >
+        <Articles id="earth-sphere" main={main} >
             <div>
                 <p>光源位置</p>
                 <form>

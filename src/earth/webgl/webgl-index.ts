@@ -54,9 +54,11 @@ function createLight(gl: WebGL2RenderingContext, program: WebGLProgram, lightPos
     const u_LightPositionLocation = gl.getUniformLocation(program,  "u_LightPosition");
     const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
     const u_LightReflectPosition = gl.getUniformLocation(program, "u_LightReflectPosition");
+    const u_SpectuarLightColor = gl.getUniformLocation(program, "u_SpectuarLightColor");
     gl.uniform3fv(u_LightReflectPosition, lightPosition);
     gl.uniform3fv(u_LightPositionLocation, lightPosition);
     gl.uniform3fv(u_LightColor, [1.0, 1.0, 1.0])
+    gl.uniform3fv(u_SpectuarLightColor, [.5, .5, .5])
 }
 
 function createWorldMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: number): void {

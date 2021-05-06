@@ -58,7 +58,7 @@ function createRectangle(webgl: W2RC, program: WebGLProgram, angle: number): voi
     ]);
 
     var texCoords = new Float32Array([ 0.0, 1.0,  0.0, 0.0,  1.0, 1.0,  1.0, 0.0 ]);
-    initMatrix(webgl, program, angle);
+    initMatrix(webgl, program, 0);
     initBuffer(webgl, program, rectanglePoints, "a_Position", 3, false);
     initBuffer(webgl, program, texCoords, "a_TexCoord", 2, false);
 
@@ -84,7 +84,7 @@ function initMatrix(webgl: W2RC, program: WebGLProgram, angle?: number) {
     mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, [0, 0, 5], [0, 0, 0], [0, 1, 0]);
+    mat4.lookAt(lM, [0, 0, 8], [0, 0, 0], [0, 1, 0]);
     const rM = mat4.create();
     mat4.identity(rM);
     mat4.rotate(rM, rM, glMatrix.toRadian(angle || 0), [0, 1, 0]);
@@ -118,9 +118,6 @@ function initFrameBufferObject(webgl: W2RC): FrameBufferItem | void {
     // webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, webgl.LINEAR);
     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, webgl.CLAMP_TO_EDGE);
     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, webgl.CLAMP_TO_EDGE);
-    // webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, webgl.CLAMP_TO_EDGE); 
-    // webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_S, webgl.CLAMP_TO_EDGE);
-    //     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_WRAP_T, webgl.CLAMP_TO_EDGE); 
     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MIN_FILTER, webgl.LINEAR);
     webgl.texParameteri(webgl.TEXTURE_2D, webgl.TEXTURE_MAG_FILTER, webgl.LINEAR);    
 
