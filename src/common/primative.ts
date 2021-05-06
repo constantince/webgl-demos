@@ -11,7 +11,7 @@ type NormalAndTexCoord = {
     texcoord: Float32Array
 }
 
-function calculatePoints(): VertexObjectsBuffer {
+export function calculatePoints(): VertexObjectsBuffer {
     const vertexs = new Float32Array([
         1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0,  // v0-v1-v2-v3 front
         1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0,  // v0-v3-v4-v5 right
