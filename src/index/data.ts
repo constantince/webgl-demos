@@ -9,6 +9,10 @@ const data: List = {
     {
         name: "地球-earth",
         path: "./earth.html"
+    },
+    {
+        name: "太阳系-solar-system",
+        path: "./solar-system.html"
     }
 ]
 };
