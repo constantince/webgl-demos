@@ -11,6 +11,13 @@ type VertexObjectsBuffer = {
     len: number
 }
 
+type BufferData = {
+    data: Float32Array | Uint16Array,
+    name: string,
+    size: 2 | 3,
+    type: number | null
+}
+
 type StartItem = {
     gl: WebGL2RenderingContext,
     radius: number, // how big the planet is
@@ -27,11 +34,7 @@ type StartItem = {
         (): WebGLProgram
     },
     // create buffer for webgl graphic
-    createBuffer: {
-        (): {
-
-        }
-    },
+    createBuffer: (data: BufferData[]) => void,
     // init matrix 
     createMatrix: {
         (name: string): mat4
@@ -72,10 +75,8 @@ class Start implements StartItem {
     resolution: null
 
     constructor(props: Props) {
-       
-        
+       this.init();
     }
-    createBuffer: () => {};
     primatives: VertexObjectsBuffer;
     createPre: any;
     fragmentShader: string;
@@ -87,9 +88,48 @@ class Start implements StartItem {
         this.primatives = this.calculateVertexSphere();
         this.program = this.createShader();
         this.gl.useProgram(this.program);
-
-        
+        this.createBuffer(this.buildBufferData());
     };
+
+    buildBufferData = () => {
+        const location: BufferData[] = [
+            {
+                name: "a_Position",
+                size: 3,
+                type: this.gl.ARRAY_BUFFER,
+                data: this.primatives.vertexs
+            },
+            {
+                name: "a_Color",
+                size: 3,
+                type: this.gl.ARRAY_BUFFER,
+                data: this.primatives.color
+            },
+            {
+                name: "a_Normal",
+                size: 2,
+                type: this.gl.ARRAY_BUFFER,
+                data: this.primatives.normal
+            },
+            {
+                name: "a_texCoord",
+                size: 2,
+                type: this.gl.ARRAY_BUFFER,
+                data: this.primatives.texcoord
+            },
+            {
+                name: null,
+                size: null,
+                type: this.gl.ELEMENT_ARRAY_BUFFER,
+                data: this.primatives.pointer
+            }
+        ];
+        return location;
+    }
+
+    draw = (type: number) => {
+        this.gl.drawElements(this.gl.TRIANGLES, this.primatives.len, type, 0);
+    }
 
     createShader = () => {
         return initShader(this.gl, this.vertexShader, this.fragmentShader);
@@ -97,6 +137,14 @@ class Start implements StartItem {
 
     calculateVertexSphere = () => {
         return calculateVertexSphere(this.resolution, this.radius);
+    }
+
+    createBuffer = (data: BufferData[]) => {
+
+        for (let index = 0; index < data.length; index++) {
+            const element = data[index];
+            initBuffer(this.gl, this.program, element.data, element.name, element.size, element.type);
+        }
     }
 
     createMatrix = (name: string) => {
