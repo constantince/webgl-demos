@@ -1,5 +1,5 @@
 import { initShader, initBuffer } from "../common/base";
-import { calculatePoints, calculateVertexSphere } from "../common/primative";
+import { calculateVertexSphere } from "../common/primative";
 import {mat4, glMatrix} from "gl-matrix";
 
 type VertexObjectsBuffer = {
@@ -140,7 +140,6 @@ class Start implements StartItem {
     }
 
     createBuffer = (data: BufferData[]) => {
-
         for (let index = 0; index < data.length; index++) {
             const element = data[index];
             initBuffer(this.gl, this.program, element.data, element.name, element.size, element.type);
@@ -158,7 +157,7 @@ class Start implements StartItem {
         mat4.rotate(vM, rM, glMatrix.toRadian(30), [0, 1, 0]);
 
         this.gl.uniformMatrix4fv(location, false, vM);
-
+        
         return vM;
     }
 
