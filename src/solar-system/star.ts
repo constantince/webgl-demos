@@ -37,23 +37,13 @@ type StartItem = {
     // create buffer for webgl graphic
     createBuffer: (data: BufferData[]) => void,
     // init matrix 
-    createMatrix: {
-        (name: string): mat4
-    },
+    createMatrix: (name: string) => mat4
     // craete Light
-    createLight: (lightColor: number[], lightPosition: number[], ambien: number[]) => void,
+    createLight: (lightColor: number[], lightPosition: number[], ambient: number[]) => void,
     // create texture for webgl 
-    createTexture: {
-        () : {
-
-        }
-    },
+    createTexture: (image: HTMLImageElement) => WebGLTexture;
     // create frame buffer
-    createFrameBuffer: {
-        () : {
-            
-        }
-    },
+    createFrameBuffer: () => void;
     // init vertex
 
 }
@@ -62,8 +52,7 @@ type Props = {
     radius: number,
     resolution: number,
     fragmentShader: string,
-    vertexShader: string,
-    textureImage: string
+    vertexShader: string
 }
 
 export default class Star implements StartItem {
@@ -73,7 +62,7 @@ export default class Star implements StartItem {
 
     matrix =  null
 
-    constructor(props: Props) {
+    constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement ,props: Props) {
        this.init();
     }
     primatives: VertexObjectsBuffer;
@@ -161,14 +150,15 @@ export default class Star implements StartItem {
         return vM;
     }
 
-    createLight = (lightColor: number[], lightPosition: number[], ambien: number[]): this => {
-        const u_LightColor = this.gl.getUniformLocation(this.program, "u_LightColor");
-        const u_LightPosition = this.gl.getUniformLocation(this.program, "u_LightPosition");
-        const u_AmbienColor = this.gl.getUniformLocation(this.program, "u_AmbienColor");
+    createLight = (lightColor: number[], lightPosition: number[], ambient: number[]): this => {
+        const gl = this.gl, program = this.program;
+        const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
+        const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
+        const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
 
-        this.gl.uniform3fv(u_LightColor, lightColor);
-        this.gl.uniform3fv(u_LightPosition, lightPosition);
-        this.gl.uniform3fv(u_AmbienColor, ambien);
+        gl.uniform3fv(u_LightColor, lightColor);
+        gl.uniform3fv(u_LightPosition, lightPosition);
+        gl.uniform3fv(u_AmbientColor, ambient);
         return this;
         
     };
@@ -176,8 +166,23 @@ export default class Star implements StartItem {
     lightUp = this.createLight;
 
 
-    createTexture: () => {};
-    createFrameBuffer: () => {};
+    createTexture = (image: HTMLImageElement): WebGLTexture => {
+        const gl = this.gl,
+            u_Sampler = gl.getUniformLocation(this.program, "u_sampler");
+
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+        const texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+        gl.uniform1i(u_Sampler, 0);
+
+        return texture;
+    };
+    createFrameBuffer = () => {};
 
 
 }
