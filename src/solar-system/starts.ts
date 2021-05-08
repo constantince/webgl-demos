@@ -145,7 +145,7 @@ class Start implements StartItem {
             initBuffer(this.gl, this.program, element.data, element.name, element.size, element.type);
         }
     }
-
+    
     createMatrix = (name: string) => {
         const vM = mat4.create();
         mat4.identity(vM);
