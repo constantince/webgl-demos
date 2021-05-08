@@ -155,7 +155,6 @@ export default class Star implements StartItem {
         const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
         const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
         const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
-
         gl.uniform3fv(u_LightColor, lightColor);
         gl.uniform3fv(u_LightPosition, lightPosition);
         gl.uniform3fv(u_AmbientColor, ambient);
