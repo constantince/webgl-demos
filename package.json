@@ -59,8 +59,6 @@
     "webpack-merge": "^5.1.4"
   },
   "dependencies": {
-    "gl-matrix": "^3.3.0",
-    "hhh": "^1.0.1",
-    "syt-components-test": "^1.0.2"
+    "gl-matrix": "^3.3.0"
   }
 }
