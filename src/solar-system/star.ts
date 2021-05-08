@@ -26,7 +26,8 @@ type StartItem = {
     textureImage: string, // the texture path
     fragmentShader: string,
     vertexShader: string,
-    primatives: VertexObjectsBuffer
+    primatives: VertexObjectsBuffer,
+    matrix: mat4
 
     init: () => void,
     // init shader program
@@ -40,11 +41,7 @@ type StartItem = {
         (name: string): mat4
     },
     // craete Light
-    createLight: {
-        () : {
-
-        }
-    },
+    createLight: (lightColor: number[], lightPosition: number[], ambien: number[]) => void,
     // create texture for webgl 
     createTexture: {
         () : {
@@ -69,10 +66,12 @@ type Props = {
     textureImage: string
 }
 
-class Start implements StartItem {
-    radius: null
+export default class Star implements StartItem {
+    radius = null
 
-    resolution: null
+    resolution =  null
+
+    matrix =  null
 
     constructor(props: Props) {
        this.init();
@@ -128,6 +127,8 @@ class Start implements StartItem {
     }
 
     draw = (type: number) => {
+        this.gl.useProgram(this.program);
+        this.matrix = this.createMatrix("v_PositonMatrix");
         this.gl.drawElements(this.gl.TRIANGLES, this.primatives.len, type, 0);
     }
 
@@ -152,7 +153,6 @@ class Start implements StartItem {
         mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
         mat4.lookAt(vM, [0, 0, 10], [0, 0, 0], [0, 1, 0]);
         const location = this.gl.getUniformLocation(this.program, name);
-
         const rM = mat4.create();
         mat4.rotate(vM, rM, glMatrix.toRadian(30), [0, 1, 0]);
 
@@ -161,11 +161,29 @@ class Start implements StartItem {
         return vM;
     }
 
+<<<<<<< HEAD:src/solar-system/starts.ts
     createLight = () => {
 
         
 
     };
+=======
+    createLight = (lightColor: number[], lightPosition: number[], ambien: number[]): this => {
+        const u_LightColor = this.gl.getUniformLocation(this.program, "u_LightColor");
+        const u_LightPosition = this.gl.getUniformLocation(this.program, "u_LightPosition");
+        const u_AmbienColor = this.gl.getUniformLocation(this.program, "u_AmbienColor");
+
+        this.gl.uniform3fv(u_LightColor, lightColor);
+        this.gl.uniform3fv(u_LightPosition, lightPosition);
+        this.gl.uniform3fv(u_AmbienColor, ambien);
+        return this;
+        
+    };
+
+    lightUp = this.createLight;
+
+
+>>>>>>> ce88ca1d1883fa6ebb4e05fe1fe73cbec5f1d31e:src/solar-system/star.ts
     createTexture: () => {};
     createFrameBuffer: () => {};
 
