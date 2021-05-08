@@ -162,7 +162,11 @@ class Start implements StartItem {
         return vM;
     }
 
-    createLight: () => {};
+    createLight = () => {
+
+        
+
+    };
     createTexture: () => {};
     createFrameBuffer: () => {};
 
