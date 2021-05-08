@@ -52,7 +52,7 @@ type Props = {
     radius: number,
     resolution: number,
     fragmentShader: string,
-    vertexShader: string
+    vertexShader: string,
 }
 
 export default class Star implements StartItem {
