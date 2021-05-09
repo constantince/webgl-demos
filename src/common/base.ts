@@ -1,5 +1,9 @@
+type W2RC = WebGL2RenderingContext;
+
+
+
 // load vertex and fragment shader
-function _loaderShader(gl:WebGL2RenderingContext, type: number, source: string): WebGLShader | null  {
+function _loaderShader(gl:W2RC, type: number, source: string): WebGLShader | null  {
     const shader = gl.createShader(type);
     if( shader ) {
         gl.shaderSource(shader, source);
@@ -14,7 +18,7 @@ function _loaderShader(gl:WebGL2RenderingContext, type: number, source: string):
     return null;
 }
 // create a webgl program
-export function createProgram(gl: WebGL2RenderingContext, shader1: WebGLShader, shader2: WebGLShader): WebGLProgram | null {
+export function createProgram(gl: W2RC, shader1: WebGLShader, shader2: WebGLShader): WebGLProgram | null {
     const program = gl.createProgram();
     if( program ) {
         gl.attachShader(program, shader1);
@@ -31,7 +35,7 @@ export function createProgram(gl: WebGL2RenderingContext, shader1: WebGLShader, 
    
 }
 // initial the shaders
-export function initShader(gl:WebGL2RenderingContext , v:string, f: string): WebGLProgram | null {
+export function initShader(gl:W2RC , v:string, f: string): WebGLProgram | null {
     const vShader = _loaderShader(gl, gl.VERTEX_SHADER, v);
     const fShader = _loaderShader(gl, gl.FRAGMENT_SHADER, f);
     if(!vShader || !fShader) return null;
@@ -39,7 +43,7 @@ export function initShader(gl:WebGL2RenderingContext , v:string, f: string): Web
     return program;
 }
 // initial the buffers
-export function initBuffer(gl: WebGL2RenderingContext, program: WebGLProgram, data: Float32Array | Uint16Array | Uint8Array, name: string | null, size: number | null, type: false | number) {
+export function initBuffer(gl: W2RC, program: WebGLProgram, data: Float32Array | Uint16Array | Uint8Array, name: string | null, size: number | null, type: false | number) {
     const buffer = gl.createBuffer();
     if( buffer ) {
         const bufferType =  type === false ?  gl.ARRAY_BUFFER : gl.ELEMENT_ARRAY_BUFFER;
@@ -87,6 +91,7 @@ export function translateToWebglColor(color: string): number[] { // #19a397
     return result;
 }
 
+// rotate object
 const now = Date.now();
 export function rotation(beginAngle: number, secondPerAngle: number): number {
     let then = Date.now();
@@ -100,15 +105,12 @@ type TEXTURE_ITEMS = {
     src: string
 }
 
-export function createTexture(gl:WebGL2RenderingContext, item: TEXTURE_ITEMS[]): Promise<WebGLTexture[]> {
-    const promises = item.map(v => 
-        loadImage(gl, v.program, v.src)
-    );
-    return Promise.all(promises);
+export function createTexture(gl:W2RC, item: TEXTURE_ITEMS[]): Promise<WebGLTexture[]> {
+    return Promise.all(item.map(v =>  loadImage(gl, v.program, v.src) ));
 }
 
 
-function loadImage (gl:WebGL2RenderingContext, program:WebGLProgram,  src: string): Promise<WebGLTexture> {
+function loadImage (gl:W2RC, program:WebGLProgram,  src: string): Promise<WebGLTexture> {
     return new Promise((resolve, reject) => {
         const image = new Image();
         image.crossOrigin = "anonymous";
@@ -120,7 +122,7 @@ function loadImage (gl:WebGL2RenderingContext, program:WebGLProgram,  src: strin
     });
 }
 
-function loadTexture(gl:WebGL2RenderingContext, program: WebGLProgram, image: TexImageSource, type: number): WebGLTexture {
+function loadTexture(gl:W2RC, program: WebGLProgram, image: TexImageSource, type: number): WebGLTexture {
     gl.useProgram(program);
     const texture = gl.createTexture();
 
@@ -153,4 +155,51 @@ function loadTexture(gl:WebGL2RenderingContext, program: WebGLProgram, image: Te
     gl.uniform1i(samplerLocation, 0);
 
     return <WebGLTexture>texture;
+}
+
+type FrameBufferItem = {
+    fbo: WebGLFramebuffer,
+    texture: WebGLTexture
+} | null;
+
+// create FrameBufferObject 
+export function createFrameBuffer(gl: W2RC, program: WebGLProgram, width:number, height: number): FrameBufferItem {
+    const fbo = gl.createFramebuffer();
+
+    if( !fbo ) {
+        console.error("frame buffer error");
+        return null;
+    }
+
+    const texture = gl.createTexture();
+
+    if( !texture ) {
+        console.error("texture created error");
+        return null;
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);  
+
+
+    const depthBuffer = gl.createRenderbuffer();
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+    const e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+
+    if( e !== gl.FRAMEBUFFER_COMPLETE) {
+        console.error("something goes wrong");
+        return null;
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
+    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
+
+
+    return {fbo, texture};
+
 }

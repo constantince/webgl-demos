@@ -48,6 +48,7 @@ export function main(id: string) {
    
 }
 
+
 // create rectangle
 function createRectangle(webgl: W2RC, program: WebGLProgram, angle: number): void {
     
@@ -64,6 +65,8 @@ function createRectangle(webgl: W2RC, program: WebGLProgram, angle: number): voi
 
     webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
 }
+
+
 
 // create cube
 function createCube(webgl: W2RC, program: WebGLProgram, angle: number): void {
