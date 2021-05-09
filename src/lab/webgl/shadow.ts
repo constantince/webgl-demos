@@ -10,7 +10,7 @@ type W2RC = WebGL2RenderingContext;
 
 export function main_shadow(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
-    const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2");
+    const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2")!;
 
     webgl.clearColor(0.0, 0.0, 0.0, 1.0);
     webgl.enable(webgl.DEPTH_TEST);
@@ -18,7 +18,13 @@ export function main_shadow(id: string) {
     const programNormal = initShader(webgl, shaders.normalVertexShader, shaders.normalFragmentShader);
     const programShadow = initShader(webgl, shaders.shadowVertexShader, shaders.shadowFragmentShader);
 
-    const { fbo, texture} = createFrameBuffer(webgl, programShadow, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+    if( !programNormal || !programShadow ) return;
+
+    const frameBuffer = createFrameBuffer(webgl, programShadow, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
+
+   if( !frameBuffer ) return;
+
+    const { fbo, texture} = frameBuffer
 
     webgl.bindTexture(webgl.TEXTURE_2D, texture);
     webgl.activeTexture(webgl.TEXTURE0);

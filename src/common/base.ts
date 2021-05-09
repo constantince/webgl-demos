@@ -160,10 +160,10 @@ function loadTexture(gl:W2RC, program: WebGLProgram, image: TexImageSource, type
 type FrameBufferItem = {
     fbo: WebGLFramebuffer,
     texture: WebGLTexture
-} | null;
+};
 
 // create FrameBufferObject 
-export function createFrameBuffer(gl: W2RC, program: WebGLProgram, width:number, height: number): FrameBufferItem {
+export function createFrameBuffer(gl: W2RC, program: WebGLProgram, width:number, height: number): FrameBufferItem | null {
     const fbo = gl.createFramebuffer();
 
     if( !fbo ) {

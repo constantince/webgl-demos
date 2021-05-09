@@ -11,7 +11,7 @@ export const main = (id: string) => {
     win.POSITIONY = 0;
     win.POSITIONZ = 8;
     const canvas = <HTMLCanvasElement>document.getElementById(id)!;
-    const webgl = canvas.getContext("webgl2")!;
+    const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2")!;
 
     webgl.clearColor(0, 0, 0, 1.0);
     webgl.enable(webgl.DEPTH_TEST);

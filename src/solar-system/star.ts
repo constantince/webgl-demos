@@ -13,12 +13,13 @@ type VertexObjectsBuffer = {
 
 type BufferData = {
     data: Float32Array | Uint16Array,
-    name: string,
-    size: 2 | 3,
-    type: number | null
+    name: string | null,
+    size: 2 | 3 | null,
+    type: number | false
 }
 
 type StartItem = {
+    canvas: HTMLCanvasElement,
     gl: WebGL2RenderingContext,
     radius: number, // how big the planet is
     resolution: number, // how soomth the planet is
@@ -26,14 +27,12 @@ type StartItem = {
     textureImage: string, // the texture path
     fragmentShader: string,
     vertexShader: string,
-    primatives: VertexObjectsBuffer,
+    //primatives: VertexObjectsBuffer,
     matrix: mat4
 
     init: () => void,
     // init shader program
-    createShader: {
-        (): WebGLProgram
-    },
+    createShader: () => WebGLProgram | null,
     // create buffer for webgl graphic
     createBuffer: (data: BufferData[]) => void,
     // init matrix 
@@ -56,26 +55,33 @@ type Props = {
 }
 
 export default class Star implements StartItem {
-    radius = null
+    radius = 1;
 
-    resolution =  null
+    resolution =  60;
 
-    matrix =  null
-
-    constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement ,props: Props) {
-       this.init();
-    }
+    matrix =  mat4.create();
+    canvas: HTMLCanvasElement;
     primatives: VertexObjectsBuffer;
     createPre: any;
-    fragmentShader: string;
-    vertexShader: string;
+    fragmentShader = "";
+    vertexShader = "";
     gl: WebGL2RenderingContext;
-    textureImage: string;
+    textureImage = "";
     program: WebGLProgram;
-    init = () => {
+
+    constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement ,props: Props) {
         this.primatives = this.calculateVertexSphere();
-        this.program = this.createShader();
-        this.gl.useProgram(this.program);
+        this.gl = gl;
+        this.canvas = canvas;
+        const _program = <WebGLProgram>this.createShader();
+        this.program = _program;
+        this.gl.useProgram(_program);
+        this.init();
+        
+        
+    }
+
+    init = () => {
         this.createBuffer(this.buildBufferData());
     };
 
@@ -179,7 +185,7 @@ export default class Star implements StartItem {
 
         gl.uniform1i(u_Sampler, 0);
 
-        return texture;
+        return <WebGLTexture>texture;
     };
     createFrameBuffer = () => {};
 
