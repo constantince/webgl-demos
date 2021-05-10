@@ -6,7 +6,9 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config webpack.prod.js",
     "watch": "webpack --watch",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --config webpack.dev.js --open"
+    "dev": "cross-env NODE_ENV=development webpack-dev-server --config webpack.dev.js --open",
+    "format": "eslint . --ext .ts",
+    "fix": "eslint --fix --ext .ts"
   },
   "keywords": [
     "no",
@@ -33,6 +35,7 @@
     "eslint-loader": "^4.0.2",
     "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.20.6",
     "eslint-plugin-react-hooks": "^4.1.0",
     "file-loader": "^6.1.0",
@@ -44,6 +47,7 @@
     "lib-flexible": "^0.3.2",
     "mini-css-extract-plugin": "^0.11.0",
     "postcss-loader": "^3.0.0",
+    "prettier": "^2.3.0",
     "px2rem-loader": "^0.1.9",
     "raw-loader": "^0.5.1",
     "react": "^17.0.2",

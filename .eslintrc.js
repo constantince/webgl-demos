@@ -19,8 +19,10 @@ module.exports = {
   },
   plugins: [
     'react',
+    "prettier",
   ],
   rules: {
+    "prettier/prettier": "error",
     "semi": "error",
     "indent": ["error", 4],
     "no-console": "off",

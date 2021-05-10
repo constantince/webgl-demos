@@ -2,7 +2,7 @@ import React from "react";
 import ReactDom from "react-dom";
 import "../common/common.scss";
 import Articles from "../comps/canvas-area";
-import { main } from "./webgl/webgl-index";
+import { main_buffer } from "./webgl/frame-buffer";
 import { main_shadow } from "./webgl/shadow";
 
 const App: React.FC = props => {

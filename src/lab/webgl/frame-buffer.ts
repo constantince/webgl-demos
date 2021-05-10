@@ -7,7 +7,7 @@ var OFFSCREEN_WIDTH = 255;
 var OFFSCREEN_HEIGHT = 255;
 type W2RC = WebGL2RenderingContext;
 
-export function main(id: string) {
+export function main_buffer(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
     const webgl = <W2RC>canvas.getContext("webgl2");
     const result = initFrameBufferObject(webgl);
