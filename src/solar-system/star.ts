@@ -121,7 +121,8 @@ export default class Star implements StartItem {
         return location;
     }
 
-    draw = (type: number) => {
+    draw = (type: number = this.gl.UNSIGNED_SHORT) => {
+
         this.gl.useProgram(this.program);
         this.matrix = this.createMatrix("v_PositonMatrix");
         this.gl.drawElements(this.gl.TRIANGLES, this.primatives.len, type, 0);
@@ -185,7 +186,7 @@ export default class Star implements StartItem {
 
         gl.uniform1i(u_Sampler, 0);
 
-        return <WebGLTexture>texture;
+        return texture as WebGLTexture;
     };
     createFrameBuffer = () => {};
 

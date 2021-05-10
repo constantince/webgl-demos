@@ -26,7 +26,7 @@ export function main(id: string) {
     }).lightUp([1.0, 1.0, 1.0], [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]);
 
     webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-    Sun.draw(webgl.UNSIGNED_SHORT);
-    Earth.draw(webgl.UNSIGNED_SHORT);
+    Sun.draw();
+    Earth.draw();
     
 }

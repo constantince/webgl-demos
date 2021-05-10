@@ -163,7 +163,7 @@ type FrameBufferItem = {
 };
 
 // create FrameBufferObject 
-export function createFrameBuffer(gl: W2RC, program: WebGLProgram, width:number, height: number): FrameBufferItem | null {
+export function createFrameBuffer(gl: W2RC, width:number, height: number): FrameBufferItem | null {
     const fbo = gl.createFramebuffer();
 
     if( !fbo ) {
