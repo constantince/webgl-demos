@@ -11,6 +11,17 @@ type NormalAndTexCoord = {
     texcoord: Float32Array
 }
 
+//create point
+export function calculatePoint() {
+    
+    const vertex = new Float32Array([
+        0.0,0.0,0.0
+    ]);
+
+    return vertex;
+}
+
+// create cube
 export function calculatePoints(): VertexObjectsBuffer {
     const vertexs = new Float32Array([
         1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0,  // v0-v1-v2-v3 front
@@ -42,6 +53,7 @@ export function calculatePoints(): VertexObjectsBuffer {
     return {vertexs, color, pointer, len: pointer.length};
 }
 
+// create sphere
 export function calculateVertexSphere(RESOLUTION: number = 60, RADIUS: number = 1): VertexObjectsBuffer & NormalAndTexCoord {
     const theta = (180 / RESOLUTION) * (Math.PI / 180); // 疑问 
     const beta = (360 / RESOLUTION) * (Math.PI / 180); 
