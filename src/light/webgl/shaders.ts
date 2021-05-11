@@ -52,7 +52,26 @@ export const fragmentShader1 = `#version 300 es
     out vec4 FragColor;
 
     void main() {
-        FragColor = vec4(${translateToWebglColor('#754c0f').join(',')});
+        FragColor = vec4(${translateToWebglColor('#421c01').join(',')});
+    }
+
+`;
+
+export const vertexShader2 = `#version 300 es
+    in vec4 a_Position;
+    in vec4 a_Color;
+    uniform mat4 u_Matrix;
+    void main() {
+        gl_Position = u_Matrix * a_Position;
+    }
+`;
+
+export const fragmentShader2 = `#version 300 es
+    precision mediump float;
+    out vec4 FragColor;
+
+    void main() {
+        FragColor = vec4(${translateToWebglColor('#212120').join(',')});
     }
 
 `;
