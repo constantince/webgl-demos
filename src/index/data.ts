@@ -13,6 +13,10 @@ const data: List = {
     {
         name: "太阳系-solar-system",
         path: "./solar-system.html"
+    },
+    {
+        name: "读过的书籍-Books I have read",
+        path: "./books-i-have-read.html"
     }
 ]
 };
