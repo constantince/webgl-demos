@@ -58,7 +58,11 @@ export const shadowFragmentShader = `#version 300 es
     out vec4 outColor;
 
     void main() {
-        outColor = vec4(gl_FragCoord.z, 0.0, 0.0, 0.0);
+        const vec4 bitShift = vec4(1.0, 256.0, 256.0*256.0, 256.0*256.0*256.0);
+        const vec4 bitMask = vec4(1.0/256.0, 1.0/256.0, 1.0/256.0, 0.0);
+        vec4 depth = fract(gl_FragCoord.z * bitShift);
+        depth -= depth.gbaa * bitMask;
+        outColor = depth;
     }
 `;
 
@@ -84,12 +88,18 @@ export const normalFragmentShader = `#version 300 es
     out vec4 outColor;
     uniform sampler2D u_Samper;
 
+    float unpackDepth(const in vec4 depth) {
+        const vec4 bitShift = vec4(1.0, 1.0/256.0, 1.0/(256.0*256.0), 1.0/(256.0*256.0*256.0));
+        float result = dot(depth, bitShift);
+        return result;
+    }
+
     void main() {
         vec3 shadowCoord = (v_PositionFromLight.xyz / v_PositionFromLight.w) / 2.0 + 0.5;
         vec4 tex = texture(u_Samper, shadowCoord.xy);
-        float depth = tex.r;
-        float visiable = (shadowCoord.z > depth + 0.005) ? 0.1 : 1.0;
-        outColor = vec4(v_Color.rgb * visiable, tex.a);
+        float depth = unpackDepth(tex);
+        float visiable = (shadowCoord.z > depth + 0.0015) ? 0.7 : 1.0;
+        outColor = vec4(v_Color.rgb * visiable, v_Color.a);
     }
 
 `;

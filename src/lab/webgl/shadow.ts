@@ -4,7 +4,7 @@ import * as shaders from './shaders';
 
 const OFFSCREEN_WIDTH = 500;
 const OFFSCREEN_HEIGHT = 500;
-const LightSource = vec3.fromValues(0.0, 7.0, 2.0);
+const LightSource = vec3.fromValues(0.0, 40.0, 2.0);
 type W2RC = WebGL2RenderingContext;
 
 export function main_shadow(id: string) {
@@ -87,18 +87,7 @@ function createRectangle(webgl: W2RC, program: WebGLProgram, angle: number, type
 	if (!program) return console.error('program do not exist');
 	// webgl.useProgram(program);
 	const rectanglePoints = new Float32Array([
-		-3.0,
-		-1.7,
-		2.5,
-		3.0,
-		-1.7,
-		2.5,
-		-3.0,
-		-1.7,
-		-2.5,
-		3.0,
-		-1.7,
-		-2.5, // v0-v1-v2-v3
+        -3.0, -1.7, 2.5, 3.0, -1.7, 2.5,  -3.0, -1.7, -2.5,   3.0, -1.7, -2.5    // v0-v1-v2-v3
 	]);
 
 	const color = new Float32Array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
@@ -140,7 +129,7 @@ function initNormlMatrix(webgl: W2RC, program: WebGLProgram, lightMatrix: mat4 |
 function initLightMatrix(webgl: W2RC, program: WebGLProgram, angle: number): mat4 {
 	const vM = mat4.create();
 	mat4.identity(vM);
-	mat4.perspective(vM, glMatrix.toRadian(70), 1, 1, 100);
+	mat4.perspective(vM, glMatrix.toRadian(70), 1, 1, 200);
 	const lM = mat4.create();
 	mat4.identity(lM);
 	mat4.lookAt(lM, LightSource, [0, 0, 0], [0, 1, 0]);
