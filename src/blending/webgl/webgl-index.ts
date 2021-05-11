@@ -36,6 +36,7 @@ export function main(id: string) {
             1.0, 0.0, 0.0, 1,
             1.0, 0.0, 0.0, 1
         ]);
+        
         var tick = () => {
             let angle = rotation(0, 45);
             webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);

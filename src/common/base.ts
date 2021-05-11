@@ -1,3 +1,5 @@
+import { mat4, glMatrix } from "gl-matrix";
+
 type W2RC = WebGL2RenderingContext;
 
 // load vertex and fragment shader
@@ -199,4 +201,27 @@ export function createFrameBuffer(gl: W2RC, width: number, height: number): Fram
 	gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
 
 	return {fbo, texture};
+}
+
+// create basic matrix;
+export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: number, move: boolean) {
+    const u_Matrix = gl.getUniformLocation(program, "u_Matrix");
+    const vM = mat4.create();
+    mat4.identity(vM);
+    mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
+
+    const lM = mat4.create();
+    mat4.identity(lM);
+    mat4.lookAt(lM, [0, 0, 10], [0, 0, 0], [0, 1, 0]);
+    
+    const rM = mat4.create();
+    mat4.identity(rM);
+    mat4.rotate(rM, rM, glMatrix.toRadian(angle), [1, 1, 1]);
+    move && mat4.translate(rM, rM, [0.2, 0.2, 0]);
+    
+    mat4.mul(vM, vM, lM);
+    mat4.mul(vM, vM, rM);
+
+    gl.uniformMatrix4fv(u_Matrix, false, vM);
+
 }

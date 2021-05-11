@@ -115,9 +115,86 @@ export function calculateVertexSphere(RESOLUTION: number = 60, RADIUS: number = 
     };
 }
 
+// create cylinder
+//计算出圆柱体以及表面线条的各个点的位置
+export function calculateCylinder(height: number, radiusB: number, radiusT: number, empty: boolean) {
+    //高，顶面圆中心点位置，粗细，分辨率，底面圆中心位置
+    const HEIGHT = height, TOP = [0, HEIGHT, 0], RESOLUTION = 50, BOTTOM = [0, 0, 0],
+    theta = 360 / RESOLUTION * Math.PI / 180;
+    let vertexs:number[] = [];
+    // 分别计算出上下表面圆边上的点
+    for (let index = 0; index < RESOLUTION; index++) {
+        // top circle
+        const x = Math.cos(theta * index) * radiusB;
+        const z = Math.sin(theta * index) * radiusB;
+
+        // bottom circle
+        const x1 = Math.cos(theta * index) * radiusT;
+        const z1 = Math.sin(theta * index) * radiusT;
+
+        const UADvetices = [x, HEIGHT, z, x1, 0, z1];
+        vertexs = vertexs.concat(UADvetices);
+    }
+    // 其他点1~resolution 底部中心点的位置 resolution + 1; 顶点位置 resolution，
+    vertexs = vertexs.concat(BOTTOM).concat(TOP);
+    let pointer: number[] = [];
+    // //斜边
+    for (let index = 0; index < RESOLUTION * 2; index++) {
+        pointer.push(index); // 顶部点的位；
+        /* 通过 % 实现当Y Z大于resultion的时候取绝对值，实现点位的循环。
+        如：x =40 时 x 为 0  或者x = 41时，x 为 1；
+        因为矩形的最后一个三角面点需要和第一个点和第二个点进行合并。
+        */
+        pointer.push( (index + 1) % (RESOLUTION * 2) );
+        pointer.push( (index + 2) % (RESOLUTION * 2) );
+
+    }
+    if( empty === false) {
+        let linePointer = [];
+        for (let index = 1; index <= RESOLUTION * 2; index = index + 2) {
+        // 第一条线
+        linePointer.push( 2 * RESOLUTION + 1); // 上表面中心
+        linePointer.push(index); // 上表面边上的一点
+        // // 第二条线
+        linePointer.push(index); //上表面边上的一点
+        linePointer.push(index + 1) ;//下表面边上的一点
+        // // 第三条线
+        linePointer.push(index) ;//下表面边上的一点
+        linePointer.push( 2 * RESOLUTION );// 下表面中心
+        
+        }
+        //底边
+        for (let index = 0; index < RESOLUTION; index++) {
+            const step = (2 * index + 1) % (2 * RESOLUTION);
+            const step2 = (2 * (index + 1) + 1) % ( 2* RESOLUTION);
+            // 永远是底部中心点开始的
+            pointer.push(step);
+            pointer.push(RESOLUTION+1);// 顶部中心点的在vertexs中的位置 即 1 + RESOLUTION
+            pointer.push(step2);
+        }
+
+        //顶边
+        for (let index = 0; index < RESOLUTION; index++) {
+        const step = (2 * index + 2) % (2 * RESOLUTION);
+        const step2 = (2 * (index + 2)) % (2 * RESOLUTION);
+        // 永远是底部中心点开始的
+        pointer.push(step);
+        pointer.push(RESOLUTION);// 底部中心点的在vertexs中的位置 即 RESOLUTION
+        pointer.push(step2);
+        }
+    }
+
+    const vertexsArray = new Float32Array(vertexs);
+    const pointerArray = new Uint16Array(pointer);
+
+    return {vertexsArray, pointerArray, len: pointerArray.length};
+}
+
+
 const VOB = {
     CubeVertex: calculatePoints,
-    SphereVertex: calculateVertexSphere
+    SphereVertex: calculateVertexSphere,
+    CylinderVertex: calculateCylinder
 }
 
 export default VOB;
