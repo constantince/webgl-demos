@@ -4,21 +4,21 @@ export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Normal;
     uniform mat4 u_Matrix;
-    uniform mat4 u_Normal;
+    uniform mat4 u_NormalMatrix;
 
     out vec4 v_WorldPosition;
     out vec3 v_Normal;
     void main() {
         gl_Position = u_Matrix * a_Position;
-        v_WorldPosition = u_Normal * a_Position;
-        v_Normal = a_Normal;
+        v_WorldPosition = u_NormalMatrix * a_Position;
+        v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
     }
 `;
 
 export const fragmentShader = `#version 300 es
     precision mediump float;
     in vec4 v_WorldPosition;
-    in vec4 v_Normal;
+    in vec3 v_Normal;
     
     uniform vec3 u_LightColor;
     uniform vec3 u_AmbientColor;
@@ -26,12 +26,12 @@ export const fragmentShader = `#version 300 es
     out vec4 FragColor;
 
     void main() {
-        normal = normalize(v_Normal);
+        // vec3 normal = normalize(v_Normal);
         vec3 lightDirection = normalize(u_LightPostion - v_WorldPosition.xyz);
-        vec4 base = vec4(1.0, 1.0, 1.0, 1.0);
-        float FDot = dot(lightDirection, normal);
-        vec4 diffuse = u_LightColor * fDot * base.rgb;
-        vec4 ambient = u_AmbientColor * base.rgb;
+        vec4 base = vec4(${translateToWebglColor('#421c01').join(',')});
+        float Fdot = max(dot(lightDirection, v_Normal), 0.0);
+        vec3 diffuse = u_LightColor * Fdot * base.rgb;
+        vec3 ambient = u_AmbientColor * base.rgb;
 
         FragColor = vec4(diffuse + ambient, base.a);
     }

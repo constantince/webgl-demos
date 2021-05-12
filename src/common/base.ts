@@ -204,8 +204,9 @@ export function createFrameBuffer(gl: W2RC, width: number, height: number): Fram
 }
 
 // create basic matrix;
-export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: number, move: boolean) {
+export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: number[], move: boolean) {
     const u_Matrix = gl.getUniformLocation(program, "u_Matrix");
+	const u_NormalMatrix = gl.getUniformLocation(program, "u_NormalMatrix");
     const vM = mat4.create();
     mat4.identity(vM);
     mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
@@ -216,12 +217,56 @@ export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, 
     
     const rM = mat4.create();
     mat4.identity(rM);
-    mat4.rotate(rM, rM, glMatrix.toRadian(angle), [1, 1, 1]);
+    mat4.rotateX(rM, rM, glMatrix.toRadian(angle[0]));
+	mat4.rotateZ(rM, rM, glMatrix.toRadian(-angle[1]));
     move && mat4.translate(rM, rM, [0.2, 0.2, 0]);
     
     mat4.mul(vM, vM, lM);
     mat4.mul(vM, vM, rM);
 
-    gl.uniformMatrix4fv(u_Matrix, false, vM);
+	const nM = mat4.create();
+	mat4.identity(nM);
+	mat4.invert(nM, rM);
+	mat4.transpose(nM, nM);
 
+    gl.uniformMatrix4fv(u_Matrix, false, vM);
+	gl.uniformMatrix4fv(u_NormalMatrix, false, nM);
+
+}
+
+
+export function initEvent(canvas:HTMLCanvasElement, currentAngle: number[]) {
+
+	let dragging = false, lastX = -1, lastY = -1;
+	canvas.onmousedown = function(ev: MouseEvent) {
+		const x = ev.clientX, y = ev.clientY;
+
+		const rect = canvas.getBoundingClientRect();
+
+		if( rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom ) {
+			lastX = x; lastY = y;
+			dragging = true;
+		}
+
+
+	}
+
+
+	canvas.onmouseup = function(ev) {
+		dragging = false;
+	}
+
+	canvas.onmousemove = function(ev) {
+		const x = ev.clientX, y = ev.clientY;
+		if( dragging) {
+			const factor = 100 / canvas.height;
+			const dx = factor * (x - lastX);
+			const dy = factor * (y - lastY);
+
+			currentAngle[0] = Math.max(Math.min(currentAngle[0] + dy, 180.0), -180.0);
+			currentAngle[1] = currentAngle[1] + dx;
+		}
+
+		lastX = x, lastY = y;
+	}
 }

@@ -122,21 +122,22 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
     const HEIGHT = height, TOP = [0, HEIGHT, 0], RESOLUTION = 50, BOTTOM = [0, 0, 0],
     theta = 360 / RESOLUTION * Math.PI / 180;
     let vertexs:number[] = [];
+    let normal:number[] = [];
     // 分别计算出上下表面圆边上的点
     for (let index = 0; index < RESOLUTION; index++) {
         // top circle
         const x = Math.cos(theta * index) * radiusB;
         const z = Math.sin(theta * index) * radiusB;
-
         // bottom circle
         const x1 = Math.cos(theta * index) * radiusT;
         const z1 = Math.sin(theta * index) * radiusT;
 
-        const UADvetices = [x, HEIGHT, z, x1, 0, z1];
-        vertexs = vertexs.concat(UADvetices);
+        vertexs.push(x, HEIGHT, z, x1, 0, z1);
+        normal.push(x, HEIGHT, z, x1, 0, z1)
     }
     // 其他点1~resolution 底部中心点的位置 resolution + 1; 顶点位置 resolution，
-    vertexs = vertexs.concat(BOTTOM).concat(TOP);
+    vertexs.push(...BOTTOM, ...TOP);
+
     let pointer: number[] = [];
     // //斜边
     for (let index = 0; index < RESOLUTION * 2; index++) {
@@ -145,8 +146,7 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
         如：x =40 时 x 为 0  或者x = 41时，x 为 1；
         因为矩形的最后一个三角面点需要和第一个点和第二个点进行合并。
         */
-        pointer.push( (index + 1) % (RESOLUTION * 2) );
-        pointer.push( (index + 2) % (RESOLUTION * 2) );
+        pointer.push( (index + 1) % (RESOLUTION * 2),  (index + 2) % (RESOLUTION * 2) );
 
     }
     if( empty === false) {
@@ -186,8 +186,9 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
 
     const vertexsArray = new Float32Array(vertexs);
     const pointerArray = new Uint16Array(pointer);
+    const normalArray = new Float32Array(normal);
 
-    return {vertexsArray, pointerArray, len: pointerArray.length};
+    return {vertexsArray, pointerArray, len: pointerArray.length, normalArray};
 }
 
 
