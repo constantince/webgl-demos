@@ -203,39 +203,7 @@ export function createFrameBuffer(gl: W2RC, width: number, height: number): Fram
 	return {fbo, texture};
 }
 
-// create basic matrix;
-export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: number[], move: boolean) {
-    const u_Matrix = gl.getUniformLocation(program, "u_Matrix");
-	const u_NormalMatrix = gl.getUniformLocation(program, "u_NormalMatrix");
-	const u_ModelMatrix = gl.getUniformLocation(program, "u_ModelMatrix");
-    const vM = mat4.create();
-    mat4.identity(vM);
-    mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
 
-    const lM = mat4.create();
-    mat4.identity(lM);
-    mat4.lookAt(lM, [0, 0, 10], [0, 0, 0], [0, 1, 0]);
-    
-    const rM = mat4.create();
-    mat4.identity(rM);
-    mat4.rotateX(rM, rM, glMatrix.toRadian(angle[0]));
-	mat4.rotateZ(rM, rM, glMatrix.toRadian(-angle[1]));
-    move && mat4.translate(rM, rM, [0.2, 0.2, 0]);
-    gl.uniformMatrix4fv(u_ModelMatrix, false, rM);
-
-
-    mat4.mul(vM, vM, lM);
-    mat4.mul(vM, vM, rM);
-
-	const nM = mat4.create();
-	mat4.identity(nM);
-	mat4.invert(nM, rM);
-	mat4.transpose(nM, nM);
-
-    gl.uniformMatrix4fv(u_Matrix, false, vM);
-	gl.uniformMatrix4fv(u_NormalMatrix, false, nM);
-
-}
 
 
 export function initEvent(canvas:HTMLCanvasElement, currentAngle: number[]) {

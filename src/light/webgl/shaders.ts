@@ -11,7 +11,7 @@ export const vertexShader = `#version 300 es
     out vec3 v_Normal;
     void main() {
         gl_Position = u_Matrix * a_Position;
-        v_WorldPosition = u_NormalMatrix * a_Position;
+        v_WorldPosition = u_ModelMatrix * a_Position;
         v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
     }
 `;
@@ -24,32 +24,41 @@ export const fragmentShader = `#version 300 es
     uniform vec3 u_LightColor;
     uniform vec3 u_AmbientColor;
     uniform vec3 u_LightPostion;
+    uniform vec3 u_EyesPosition;
     out vec4 FragColor;
-    const float shiness = 32.0;
+    const float shininess = 300.0;
     void main() {
-        // vec3 normal = normalize(v_Normal);
-        vec3 lightDirection = normalize(u_LightPostion - v_WorldPosition.xyz);
         vec4 base = vec4(${translateToWebglColor('#421c01').join(',')});
-        float Fdot = max(dot(lightDirection, v_Normal), 0.0);
 
-        vec3 reflection = normalize(reflect(lightDirection, v_Normal));
-        // 反射光线与法线的点积 l * n * cos()
-        float sDot = max(dot(reflection, -v_WorldPosition.xyz), 0.0);
-        // 镜面放射光 S
-        float specularLightWeight = pow(sDot, shiness);
+        // surface to light
+        vec3 lightDirection = normalize(u_LightPostion - v_WorldPosition.xyz);
 
+        // surface to eye
+        vec3 eyeDirection = normalize(u_EyesPosition - v_WorldPosition.xyz);
+
+        vec3 halfVector = normalize(lightDirection + eyeDirection);
+
+        float light = max(dot(lightDirection, v_Normal), 0.0);
+        float specularLightWeight = 0.0;
+        if (light > 0.0) {
+           specularLightWeight = pow(dot(v_Normal, halfVector), shininess);
+        }
 
         // 环境光线A
         vec3 ambient = u_AmbientColor;
-        // 漫反射光线D
-        vec3 diffuse = u_LightColor * Fdot;
-        // 镜面光线S
-        vec3 specularReflection =  u_LightColor * specularLightWeight;
+        //漫反射光线D
+        vec3 diffuse = u_LightColor * light;
+        //镜面光线S
+        vec3 specularReflection = u_LightColor * specularLightWeight;
        
         
         vec3 c = ( diffuse + ambient + specularReflection ) * base.rgb;
 
-        FragColor = vec4(c, base.a);
+        FragColor = vec4(c, 1.0);
+
+        // FragColor.rgb *= light;
+
+        // FragColor.rgb += specularLightWeight;
     }
 
 `;
