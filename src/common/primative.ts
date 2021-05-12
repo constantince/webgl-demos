@@ -22,7 +22,7 @@ export function calculatePoint() {
 }
 
 // create cube
-export function calculatePoints(): VertexObjectsBuffer {
+export function calculatePoints(): VertexObjectsBuffer & {normals: Float32Array} {
     const vertexs = new Float32Array([
         1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0,  // v0-v1-v2-v3 front
         1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0,  // v0-v3-v4-v5 right
@@ -41,6 +41,15 @@ export function calculatePoints(): VertexObjectsBuffer {
        0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0   // v4-v7-v6-v5 back
     ]);
 
+    var normals = new Float32Array([    // Normal
+        0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
+        1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
+        0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,   0.0, 1.0, 0.0,  // v0-v5-v6-v1 up
+       -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  -1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+        0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,   0.0,-1.0, 0.0,  // v7-v4-v3-v2 down
+        0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0,   0.0, 0.0,-1.0   // v4-v7-v6-v5 back
+      ]);
+
     const pointer = new Uint16Array([
         0, 1, 2,   0, 2, 3,    // front
         4, 5, 6,   4, 6, 7,    // right
@@ -50,7 +59,7 @@ export function calculatePoints(): VertexObjectsBuffer {
        20,21,22,  20,22,23     // back
     ]);
 
-    return {vertexs, color, pointer, len: pointer.length};
+    return {vertexs, color, pointer, normals, len: pointer.length};
 }
 
 // create sphere
@@ -119,7 +128,7 @@ export function calculateVertexSphere(RESOLUTION: number = 60, RADIUS: number = 
 //计算出圆柱体以及表面线条的各个点的位置
 export function calculateCylinder(height: number, radiusB: number, radiusT: number, empty: boolean) {
     //高，顶面圆中心点位置，粗细，分辨率，底面圆中心位置
-    const HEIGHT = height, TOP = [0, HEIGHT, 0], RESOLUTION = 50, BOTTOM = [0, 0, 0],
+    const HEIGHT = height, TOP = [0, HEIGHT, 0], RESOLUTION = 50, BOTTOM = [0, -1, 0],
     theta = 360 / RESOLUTION * Math.PI / 180;
     let vertexs:number[] = [];
     let normal:number[] = [];
@@ -132,8 +141,8 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
         const x1 = Math.cos(theta * index) * radiusT;
         const z1 = Math.sin(theta * index) * radiusT;
 
-        vertexs.push(x, HEIGHT, z, x1, 0, z1);
-        normal.push(x, HEIGHT, z, x1, 0, z1)
+        vertexs.push(x, HEIGHT, z, x1, -1, z1);
+        normal.push(x, HEIGHT, z, x1, -1, z1)
     }
     // 其他点1~resolution 底部中心点的位置 resolution + 1; 顶点位置 resolution，
     vertexs.push(...BOTTOM, ...TOP);
@@ -191,6 +200,33 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
     return {vertexsArray, pointerArray, len: pointerArray.length, normalArray};
 }
 
+export function newCylinder() {
+    var h = 1, r1 = .5, r2 = .2, nPhi = 100;
+    var pt = [], nt = [];
+   var Phi = 0, dPhi = 2*Math.PI / (nPhi-1),
+     Nx = r1 - r2, Ny = h, N = Math.sqrt(Nx*Nx + Ny*Ny);
+   Nx /= N; Ny /= N;
+   for (var i = 0; i < nPhi; i++ ){
+      var cosPhi = Math.cos( Phi );
+      var sinPhi = Math.sin( Phi );
+      var cosPhi2 = Math.cos( Phi + dPhi/2 );
+      var sinPhi2 = Math.sin( Phi + dPhi/2 );
+      pt.push ( -h/2, cosPhi * r1, sinPhi * r1 );   // points
+      nt.push ( Nx, Ny*cosPhi, Ny*sinPhi );         // normals
+      pt.push ( h/2, cosPhi2 * r2, sinPhi2 * r2 );  // points
+      nt.push ( Nx, Ny*cosPhi2, Ny*sinPhi2 );       // normals
+      Phi   += dPhi;
+   }
+
+
+    const vertexsArray = new Float32Array(pt);
+    // const pointerArray = new Uint16Array(pointer);
+    const normalArray = new Float32Array(nt);
+
+   return {
+    vertexsArray, normalArray, len: 2*nPhi
+   }
+}
 
 const VOB = {
     CubeVertex: calculatePoints,

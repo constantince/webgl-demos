@@ -207,6 +207,7 @@ export function createFrameBuffer(gl: W2RC, width: number, height: number): Fram
 export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: number[], move: boolean) {
     const u_Matrix = gl.getUniformLocation(program, "u_Matrix");
 	const u_NormalMatrix = gl.getUniformLocation(program, "u_NormalMatrix");
+	const u_ModelMatrix = gl.getUniformLocation(program, "u_ModelMatrix");
     const vM = mat4.create();
     mat4.identity(vM);
     mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
@@ -220,7 +221,9 @@ export function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, 
     mat4.rotateX(rM, rM, glMatrix.toRadian(angle[0]));
 	mat4.rotateZ(rM, rM, glMatrix.toRadian(-angle[1]));
     move && mat4.translate(rM, rM, [0.2, 0.2, 0]);
-    
+    gl.uniformMatrix4fv(u_ModelMatrix, false, rM);
+
+
     mat4.mul(vM, vM, lM);
     mat4.mul(vM, vM, rM);
 
@@ -263,10 +266,13 @@ export function initEvent(canvas:HTMLCanvasElement, currentAngle: number[]) {
 			const dx = factor * (x - lastX);
 			const dy = factor * (y - lastY);
 
-			currentAngle[0] = Math.max(Math.min(currentAngle[0] + dy, 180.0), -180.0);
+			currentAngle[0] = currentAngle[0] + dy;
 			currentAngle[1] = currentAngle[1] + dx;
 		}
 
 		lastX = x, lastY = y;
 	}
 }
+
+
+
