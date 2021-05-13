@@ -11,121 +11,160 @@ type NormalAndTexCoord = {
 	texcoord: Float32Array;
 };
 
+type Demention2 = {
+	vertex: Float32Array;
+	color: Float32Array;
+	count: number;
+};
+
+type Demention3 = Demention2 & {
+	pointer: Uint16Array,
+	normal: Float32Array,
+	texcoord: Float32Array
+}
+
+const EMPTYFLOATARRAY = new Float32Array([]);
+
 //create point
-export function calculatePoint() {
+export function calculatePoint(): Demention2 {
 	const vertex = new Float32Array([0.0, 0.0, 0.0]);
 
-	return vertex;
+	return {vertex, color: EMPTYFLOATARRAY, count: 0};
 }
 
 // create triangle
-export function createTriangleMesh() {
-    const vertex = new Float32Array([
-        0.5, 0.0, 0.0,
-        -0.5, 0.0, 0.0,
-        0.0, 0.5, 0.0
-    ]);
+export function createTriangleMesh(): Demention2 {
+	const vertex = new Float32Array([0.5, 0.0, 0.0, -0.5, 0.0, 0.0, 0.0, 0.5, 0.0]);
 
-    const color = new Float32Array([
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-        0.0, 0.0, 1.0
-    ]);
+	const color = new Float32Array([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
 
-    return {vertex, color};
+	return {vertex, color, count: 0};
 }
 
-// create line 
-export function createLineMesh() {
-    const vertex = new Float32Array([
-        0.0, 0.0, 0.0,
-        0.5, 0.5, 0.0,
-        0.4, 0.3, 0.0,
-        0.1, 0.6, 0.0
-    ]);
+// create line
+export function createLineMesh(): Demention2 {
+	const vertex = new Float32Array([0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.4, 0.3, 0.0, 0.1, 0.6, 0.0]);
 
-    const color = new Float32Array([
-        1.0, 0.0, 0.0,
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-        0.0, 0.0, 1.0
-    ]);
-    return {vertex, color};
+	const color = new Float32Array([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
+	return {vertex, color, count: 0};
 }
 
 // create rectangle
-export function createRectangleMesh() {
-     //在webgl中定义好四个点的位置
-    const vertex = new Float32Array([
-        0,0, 0.0,
-        0.5, 0.5,
-        0.0, 0.5,
-        0.5, 0.0
-    ]);
+export function createRectangleMesh(): Demention2 {
+	//在webgl中定义好四个点的位置
+	const vertex = new Float32Array([0, 0, 0.0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0]);
 
-    const color = new Float32Array([
-        1.0, 1.0, 1.0,
-        1.0, 0.0, 0.0,
-        0.0, 1.0, 0.0,
-        0.0, 0.0, 1.0
-    ]);
+	const color = new Float32Array([1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
 
-    return {vertex, color};
+	return {vertex, color, count: 0};
 }
 
 // create Star
-export function createStarMesh() {
+export function createStarMesh(): Demention2 {
 	//一共十个点
-    const counts = 10,
-    // 最远的点和最短的点到中心的距离
-    radius = 0.8, min_radis = 0.4,
-    //将夹角转换成弧度
-    radiation = ( Math.PI / 180 ) * (360 / 10),
-    //中心位置
-    center = [0.0, 0.0];
+	const counts = 10,
+		// 最远的点和最短的点到中心的距离
+		radius = 0.45,
+		min_radis = 0.25,
+		//将夹角转换成弧度
+		radiation = (Math.PI / 180) * (360 / 10),
+		//中心位置
+		center = [0.0, 0.0];
 
-    let vertexs:number[] = center;
-	let color:number[] = [1.0, 1.0, 0.0];
-    for (let index = 0; index <= counts; index++) {
+	let vertexs: number[] = center;
+	let color: number[] = [1.0, 1.0, 0.0];
+	for (let index = 0; index <= counts; index++) {
 		// 顶点的位置
-        let x = Math.sin(radiation * index) * radius;
-        let y = Math.cos(radiation * index) * radius;
+		let x = Math.sin(radiation * index) * radius;
+		let y = Math.cos(radiation * index) * radius;
 		// 内圈顶点的位置
-        if (index % 2 === 0) {
-            x = Math.sin(radiation * index) * min_radis;
-            y = Math.cos(radiation * index) * min_radis;
-        }
-        vertexs.push(x);
-        vertexs.push(y);
-		color.push(...[1.0, 1.0, 0.0])
-    }
+		if (index % 2 === 0) {
+			x = Math.sin(radiation * index) * min_radis;
+			y = Math.cos(radiation * index) * min_radis;
+		}
+		vertexs.push(x);
+		vertexs.push(y);
+		color.push(...[1.0, 1.0, 0.0]);
+	}
 
-    return {
+	return {
 		vertex: new Float32Array(vertexs),
 		color: new Float32Array(color),
-		count: counts + 2
-	}
+		count: counts + 2,
+	};
 }
 
 // create circle
-export function createCircleMesh(resolution: number, radius: number) {
-	 //将夹角转换成弧度
-	 const radiation = ( Math.PI / 180 ) * (360 / resolution),
-	 //中心位置
-	 center = [0.0, 0.0];
-	 let vertexs: number[] = center;
-	 let color: number[] = [0.0, 0.0, 1.0];
-	 for (let index = 0; index <= resolution; index++) {
-		   let x = Math.sin(radiation * index) * radius;
-		   let y = Math.cos(radiation * index) * radius;
-		   vertexs.push(x);
-		   vertexs.push(y);
-		   color.push(0.0, 0.0, 1.0)
-	 }
-	 return {
-		 vertex: new Float32Array(vertexs),
-		 count: resolution + 2,
-		 color: new Float32Array(color)
+export function createCircleMesh(resolution: number, radius: number): Demention2 {
+	//将夹角转换成弧度
+	const radiation = (Math.PI / 180) * (360 / resolution),
+		//中心位置
+		center = [0.0, 0.0];
+	let vertexs: number[] = center;
+	let color: number[] = [0.0, 0.0, 1.0];
+	for (let index = 0; index <= resolution; index++) {
+		let x = Math.sin(radiation * index) * radius;
+		let y = Math.cos(radiation * index) * radius;
+		vertexs.push(x);
+		vertexs.push(y);
+		color.push(0.0, 0.0, 1.0);
+	}
+	return {
+		vertex: new Float32Array(vertexs),
+		count: resolution + 2,
+		color: new Float32Array(color),
+	};
+}
+
+// create cube
+export function createCubeMesh():Demention3 {
+	const vertex = new Float32Array([
+		-0.5, -0.5, 0.5,
+		-0.5, 0.5, 0.5,
+		0.5, 0.5, 0.5,
+		0.5, -0.5, 0.5,
+
+		-0.5, -0.5, -0.5,
+		-0.5, 0.5, -0.5,
+		0.5, 0.5, -0.5,
+		0.5, -0.5, -0.5,
+	]);
+
+	const color = new Float32Array([
+		1.0, 1.0, 1.0,
+		1.0, 0.0, 0.0,
+		0.0, 1.0, 1.0,
+		1.0, 1.0, 1.0, 
+		0.0, 1.0, 1.0, 
+		1.0, 0.5, 1.0,
+		0.0, 0.0, 0.0,
+		1.0, 0.0, 1.0,
+	]);
+
+	const normal = new Float32Array([
+		0, 0, -1,
+		-1, 0, 0,
+		1, 0, 0,
+		0, 0, 1,
+		0, -1, 0,
+		0, 1, 0
+	]);
+
+	const pointer = new Uint16Array([
+		0, 1, 2, 2, 0, 3, // FRONT,
+		0, 4, 1, 1, 4, 5, // LEFT
+		2, 3, 7, 2, 7, 6, // RIGHT
+		4, 5, 6, 4, 6, 7, // BACK
+		4, 0, 7, 0, 7, 3, // BOTTOM
+		1, 5, 6, 1, 6, 2 // TOP
+	]);
+
+	const texcoord = new Float32Array([
+		
+	])
+
+	return {
+		vertex, color, pointer, count: pointer.length, normal, texcoord
 	}
 }
 

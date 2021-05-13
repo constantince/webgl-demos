@@ -1,4 +1,4 @@
-export const vertexShaderPoint = `#version 300 es
+export const vertexShader2Demension = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
     out vec4 v_Color;
@@ -9,7 +9,7 @@ export const vertexShaderPoint = `#version 300 es
     }
 `;
 
-export const fragmentShaderPoint = `#version 300 es
+export const fragmentShader2Demension = `#version 300 es
     precision mediump float;
     in vec4 v_Color;
     out vec4 outColor;
@@ -18,7 +18,7 @@ export const fragmentShaderPoint = `#version 300 es
     }
 `;
 
-export const vertexShader = `#version 300 es
+export const vertexShader3Demension = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
     uniform mat4 u_Matrix;
@@ -30,7 +30,7 @@ export const vertexShader = `#version 300 es
     }
 `;
 
-export const fragmentShader = `#version 300 es
+export const fragmentShader3Demension = `#version 300 es
     precision mediump float;
     in vec4 v_Color;
     out vec4 FragColor;

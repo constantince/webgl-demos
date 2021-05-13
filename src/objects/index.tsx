@@ -26,6 +26,10 @@ const data = [{
     {
         name: "circle",
         word: "圆形-circle"
+    },
+    {
+        name: "cube",
+        word: "立方体-cube"
     }
 ]
 
