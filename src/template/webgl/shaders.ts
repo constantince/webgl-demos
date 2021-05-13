@@ -18,5 +18,4 @@ const fragmentShader = `#version 300 es
     void main() {
         FragColor = v_Color;
     }
-
 `;

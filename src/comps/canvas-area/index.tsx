@@ -4,7 +4,7 @@ type Props = {
     height?: number,
     width?: number,
     main: {
-        (id: string) : void
+        (id: string, func?: string) : void
     },
     id: string,
     children?: JSX.Element

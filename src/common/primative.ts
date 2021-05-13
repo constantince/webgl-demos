@@ -18,6 +18,117 @@ export function calculatePoint() {
 	return vertex;
 }
 
+// create triangle
+export function createTriangleMesh() {
+    const vertex = new Float32Array([
+        0.5, 0.0, 0.0,
+        -0.5, 0.0, 0.0,
+        0.0, 0.5, 0.0
+    ]);
+
+    const color = new Float32Array([
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0
+    ]);
+
+    return {vertex, color};
+}
+
+// create line 
+export function createLineMesh() {
+    const vertex = new Float32Array([
+        0.0, 0.0, 0.0,
+        0.5, 0.5, 0.0,
+        0.4, 0.3, 0.0,
+        0.1, 0.6, 0.0
+    ]);
+
+    const color = new Float32Array([
+        1.0, 0.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0
+    ]);
+    return {vertex, color};
+}
+
+// create rectangle
+export function createRectangleMesh() {
+     //在webgl中定义好四个点的位置
+    const vertex = new Float32Array([
+        0,0, 0.0,
+        0.5, 0.5,
+        0.0, 0.5,
+        0.5, 0.0
+    ]);
+
+    const color = new Float32Array([
+        1.0, 1.0, 1.0,
+        1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0
+    ]);
+
+    return {vertex, color};
+}
+
+// create Star
+export function createStarMesh() {
+	//一共十个点
+    const counts = 10,
+    // 最远的点和最短的点到中心的距离
+    radius = 0.8, min_radis = 0.4,
+    //将夹角转换成弧度
+    radiation = ( Math.PI / 180 ) * (360 / 10),
+    //中心位置
+    center = [0.0, 0.0];
+
+    let vertexs:number[] = center;
+	let color:number[] = [1.0, 1.0, 0.0];
+    for (let index = 0; index <= counts; index++) {
+		// 顶点的位置
+        let x = Math.sin(radiation * index) * radius;
+        let y = Math.cos(radiation * index) * radius;
+		// 内圈顶点的位置
+        if (index % 2 === 0) {
+            x = Math.sin(radiation * index) * min_radis;
+            y = Math.cos(radiation * index) * min_radis;
+        }
+        vertexs.push(x);
+        vertexs.push(y);
+		color.push(...[1.0, 1.0, 0.0])
+    }
+
+    return {
+		vertex: new Float32Array(vertexs),
+		color: new Float32Array(color),
+		count: counts + 2
+	}
+}
+
+// create circle
+export function createCircleMesh(resolution: number, radius: number) {
+	 //将夹角转换成弧度
+	 const radiation = ( Math.PI / 180 ) * (360 / resolution),
+	 //中心位置
+	 center = [0.0, 0.0];
+	 let vertexs: number[] = center;
+	 let color: number[] = [0.0, 0.0, 1.0];
+	 for (let index = 0; index <= resolution; index++) {
+		   let x = Math.sin(radiation * index) * radius;
+		   let y = Math.cos(radiation * index) * radius;
+		   vertexs.push(x);
+		   vertexs.push(y);
+		   color.push(0.0, 0.0, 1.0)
+	 }
+	 return {
+		 vertex: new Float32Array(vertexs),
+		 count: resolution + 2,
+		 color: new Float32Array(color)
+	}
+}
+
 // create cube
 export function calculatePoints(): VertexObjectsBuffer & {normals: Float32Array} {
 	const vertexs = new Float32Array([

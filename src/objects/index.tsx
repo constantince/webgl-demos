@@ -1,18 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDom from "react-dom";
 import "../common/common.scss";
 import Articles from "../comps/canvas-area";
 import { main } from "./webgl/webgl-index";
+const data = [{
+        name: "point",
+        word: "点-point"
+    },
+    {
+        name: "line",
+        word: "线-line"
+    },
+    {
+        name: "triangle",
+        word: "三角形-triangle"
+    },
+    {
+        name: "rectangle",
+        word: "矩形-rectangle"
+    },
+    {
+        name: "star",
+        word: "五角星-star"
+    },
+    {
+        name: "circle",
+        word: "圆形-circle"
+    }
+]
 
+const WIN: any = window;
 const App: React.FC = props => {
+
+    function select(ev: any) {
+       WIN.type = ev.target.value;
+    }
+
     return <div className="container"> 
         <Articles id="template" main={main} >
 
             <form>
                 <label>基础形状：</label>
-                <select>
-                    <option value="point">点-point</option>
-                    <option value="point">线-line</option>
+                <select onChange={select}>
+                    {data.map(v => <option key={v.name} value={v.name} >{v.word}</option>)}
                 </select>
             </form>
 
