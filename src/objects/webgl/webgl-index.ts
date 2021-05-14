@@ -106,7 +106,7 @@ const triangle: CallFunc = (webgl, program) => {
 const rectangle: CallFunc = (webgl, program) => {
     const {vertex, color} = createRectangleMesh();
     webgl.useProgram(program);
-    initBuffer(webgl, program, vertex, "a_Position", 2, false);
+    initBuffer(webgl, program, vertex, "a_Position", 3, false);
     initBuffer(webgl, program, color, "a_Color", 3, false);
     webgl.clear(webgl.COLOR_BUFFER_BIT);
     webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);

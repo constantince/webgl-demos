@@ -52,11 +52,16 @@ export function createLineMesh(): Demention2 {
 // create rectangle
 export function createRectangleMesh(): Demention2 {
 	//在webgl中定义好四个点的位置
-	const vertex = new Float32Array([0, 0, 0.0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0]);
+	const vertex = new Float32Array([ 
+		0.0, 0.3, 0.0,
+		0.0, 0.0, 0.0,
+		0.3, 0.3, 0.0,
+		0.3, -0.3, 0.0
+	]);
 
 	const color = new Float32Array([1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
 
-	return {vertex, color, count: 0};
+	return {vertex, color, count: 4};
 }
 
 // create Star

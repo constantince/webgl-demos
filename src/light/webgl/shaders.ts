@@ -45,20 +45,30 @@ export const fragmentShader = `#version 300 es
         }
 
         // 环境光线A
-        vec3 ambient = u_AmbientColor;
+        vec3 ambient = u_AmbientColor * base.rgb;
         //漫反射光线D
-        vec3 diffuse = u_LightColor * light;
+        vec3 diffuse = u_LightColor * light * base.rgb;
         //镜面光线S
         vec3 specularReflection = u_LightColor * specularLightWeight;
        
         
-        vec3 c = ( diffuse + ambient + specularReflection ) * base.rgb;
-
+        vec3 c = diffuse + specularReflection + ambient;
+        
         FragColor = vec4(c, 1.0);
+
+        // FragColor = base;
+
+        // FragColor.rgb *= u_LightColor;
+
+        // FragColor.rgb += u_LightColor * u_AmbientColor;
+
+        // FragColor.rgb += u_AmbientColor;
 
         // FragColor.rgb *= light;
 
         // FragColor.rgb += specularLightWeight;
+
+       
     }
 
 `;
