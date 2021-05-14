@@ -26,9 +26,12 @@ export const fragmentShader = `#version 300 es
     uniform vec3 u_LightPostion;
     uniform vec3 u_EyesPosition;
     uniform vec3 u_LightDirection;
-    uniform float u_limit;
+    uniform vec3 u_SpotDirection;
+    uniform float u_innerLimit;
+    uniform float u_outerLimit;
     out vec4 FragColor;
-    const float shininess = 300.0;
+    const float shininess = 32.0;
+    const float spotExponent = 40.0;
     void main() {
         vec4 base = vec4(${translateToWebglColor('#421c01').join(',')});
 
@@ -40,22 +43,28 @@ export const fragmentShader = `#version 300 es
 
         vec3 halfVector = normalize(lightDirection + eyeDirection);
 
-        float light = 0.0;
-        float specularLightWeight = 0.0;
-        float dotFromDirection = dot(lightDirection, -u_LightDirection);
+        float diffuseLightWeight = max(dot(lightDirection, v_Normal), 0.0);
+        float specularLightWeight = pow(dot(v_Normal, halfVector), shininess);
+        float limitRange = u_innerLimit - u_outerLimit;
+        float dotFromDirection = dot(normalize(u_SpotDirection), normalize(-lightDirection));
 
-        // if( dotFromDirection >= u_limit) {
-            light = max(dot(lightDirection, v_Normal), 0.0);
-            if (light > 0.0) {
-                specularLightWeight = pow(dot(v_Normal, halfVector), shininess);
-            }
-        // }       
+        float inLight = clamp((dotFromDirection - u_outerLimit) / limitRange, 0.0, 1.0);
+
+        //  if( spotEffect > u_limit) {
+        //     spotEffect = pow(spotEffect, spotExponent);
+        //     diffuseLightWeight = max(dot(lightDirection, v_Normal), 0.0);
+        //     if (diffuseLightWeight > 0.0) {
+        //         specularLightWeight = pow(dot(v_Normal, halfVector), shininess);
+        //     }
+        //  }       
+
+         vec3 c = (inLight  * u_LightColor * specularLightWeight) + (inLight * u_LightColor * diffuseLightWeight);
     
-        FragColor = base;
+        FragColor = vec4(c * base.rgb, 1.0);
 
-        FragColor.rgb *= light;
+        // FragColor.rgb *= light;
 
-        FragColor.rgb += specularLightWeight;
+        // FragColor.rgb += specularLightWeight;
 
     }
 
