@@ -71,14 +71,14 @@ function createCubeMesh() {
   
     // Write the vertex property to buffers (coordinates, colors and normals)
     return {
-        vertex, pointer, normal, count: pointer.length
+        vertex, pointer, normal, count: pointer.length, color
     }
   }
 
 export function main(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
     const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2");
-    const bkColor = translateToWebglColor("#FFFFFF");
+    const bkColor = translateToWebglColor("#000000");
     webgl.clearColor(bkColor[0], bkColor[1], bkColor[2], 1.0);
     webgl.enable(webgl.DEPTH_TEST);
    
@@ -108,11 +108,19 @@ export function main(id: string) {
                 0, 1, 0,
                 0, 1, 0,
                 0, 1, 0]), 'a_Normal', 3, false);
+
+            initBuffer(webgl, program, new Float32Array([
+                1.0, 1, 1,
+                1.0, 1, 1,
+                1.0, 1, 1,
+                1.0, 1, 1,
+            ]), 'a_Color', 3, false);
             webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, count);
 
 
             initBuffer(webgl, program, cube.vertex, 'a_Position', 3, false);
             initBuffer(webgl, program, cube.normal, 'a_Normal', 3, false);
+            initBuffer(webgl, program, cube.color, 'a_Color', 3, false);
             initBuffer(webgl, program, cube.pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
             webgl.drawElements(webgl.TRIANGLES, cube.count, webgl.UNSIGNED_SHORT, 0);
 
@@ -130,17 +138,19 @@ function lightUp(gl: WebGL2RenderingContext, program: WebGLProgram) {
     const u_SpotDirectionLocation = gl.getUniformLocation(program, "u_SpotDirection");
     const u_innerLimitLocation = gl.getUniformLocation(program, "u_innerLimit");
     const u_outerLimitLocation = gl.getUniformLocation(program, "u_outerLimit");
+    const u_LightDirectionLocation = gl.getUniformLocation(program, "u_LightDirection");
 
-    const innerLimit = glMatrix.toRadian(WIN.L);
-    const outerLimit = glMatrix.toRadian(WIN.LO);
+    // const innerLimit = glMatrix.toRadian(WIN.L);
+    // const outerLimit = glMatrix.toRadian(WIN.LO);
 
-    gl.uniform3fv(u_AmbientColorLocation, [0.3, 0.3, 0.3]);
+    gl.uniform3fv(u_AmbientColorLocation, [0.1, 0.1, 0.1]);
     gl.uniform3fv(u_LightColorLocation, [1.0, 1.0, 1.0]);
-    gl.uniform3fv(u_LightPositionLocation, [1.0, 20.0, 10.0]);
-    gl.uniform1f(u_innerLimitLocation, Math.cos(innerLimit));
-    gl.uniform1f(u_outerLimitLocation, Math.cos(outerLimit));
+    gl.uniform3fv(u_LightPositionLocation, [0.0, 20.0, -20.0]);
+    gl.uniform1f(u_innerLimitLocation, Math.cos(glMatrix.toRadian(3.1)));
+    gl.uniform1f(u_outerLimitLocation, Math.cos(glMatrix.toRadian(4.1)));
 
-    gl.uniform3fv(u_SpotDirectionLocation, [WIN.X, WIN.Y, WIN.Z]);
+    gl.uniform3fv(u_SpotDirectionLocation, [WIN.X, WIN.Y, 100]);
+    // gl.uniform3fv(u_LightDirectionLocation, [0.0, 20.0, -20.0]);
 
 }
 
@@ -157,7 +167,7 @@ function createMatrix(gl: WebGL2RenderingContext, program: WebGLProgram, angle: 
 
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, [0, 20, -15], [0, 0, 0], [0, 1, 0]);
+    mat4.lookAt(lM, [0, 20, -20], [0, 0, 0], [0, 1, 0]);
     gl.uniform3fv(u_EyesPosition, [0, 10, -15]);
 
     const rM = mat4.create();

@@ -4,11 +4,8 @@ import "../common/common.scss";
 import Articles from "../comps/canvas-area";
 import { main } from "./webgl/webgl-index";
 const win:any = window;
-win.X = 1;
-win.Y = 1;
-win.Z = 1;
-win.L = 6;
-win.LO = 6;
+win.X = 0;
+win.Y = -100;
 const App: React.FC = props => {
 
     function changeLight(type: string, value: string) {
@@ -21,24 +18,12 @@ const App: React.FC = props => {
                 <p>光源位置</p>
                 <form>
                     x:
-                    <input type="range" step="0.1" max="100" defaultValue="0" min="-100" onChange={(e) => {
+                    <input type="range" step="0.1" max="39" defaultValue="0" min="-38" onChange={(e) => {
                         changeLight("X", e.target.value)
                     }} />
                     y:
-                    <input type="range" step="0.1" max="100" defaultValue="0" min="-100" onChange={(e) => {
+                    <input type="range" step="0.1" max="-50" defaultValue="-100" min="-150" onChange={(e) => {
                         changeLight("Y", e.target.value)
-                    }} />
-                    z:
-                    <input type="range" step="0.1" max="100" defaultValue="0" min="-100" onChange={(e) => {
-                        changeLight("Z", e.target.value)
-                    }} />
-                    inner-l:
-                    <input type="range" step="1" max="180" defaultValue="2" min="0" onChange={(e) => {
-                        changeLight("L", e.target.value)
-                    }} />
-                     outer-l:
-                    <input type="range" step="1" max="180" defaultValue="2" min="0" onChange={(e) => {
-                        changeLight("LO", e.target.value)
                     }} />
                 </form>
             </div>
