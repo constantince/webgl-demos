@@ -52,7 +52,7 @@ export const fragmentShader = `#version 300 es
         float limitRange = u_innerLimit - u_outerLimit;
         float dotFromDirection = dot(normalize(u_SpotDirection), normalize(-lightDirection));
 
-        float inLight = clamp((dotFromDirection - u_outerLimit) / limitRange, 0.0, 1.0);
+        float inLight = smoothstep( u_outerLimit, u_innerLimit, dotFromDirection);
 
         //  if( spotEffect > u_limit) {
         //     spotEffect = pow(spotEffect, spotExponent);

@@ -147,7 +147,7 @@ function lightUp(gl: WebGL2RenderingContext, program: WebGLProgram) {
     gl.uniform3fv(u_LightColorLocation, [1.0, 1.0, 1.0]);
     gl.uniform3fv(u_LightPositionLocation, [0.0, 20.0, -20.0]);
     gl.uniform1f(u_innerLimitLocation, Math.cos(glMatrix.toRadian(3.1)));
-    gl.uniform1f(u_outerLimitLocation, Math.cos(glMatrix.toRadian(4.1)));
+    gl.uniform1f(u_outerLimitLocation, Math.cos(glMatrix.toRadian(3.8)));
 
     gl.uniform3fv(u_SpotDirectionLocation, [WIN.X, WIN.Y, 100]);
     // gl.uniform3fv(u_LightDirectionLocation, [0.0, 20.0, -20.0]);

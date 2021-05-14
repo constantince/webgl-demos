@@ -1,6 +1,15 @@
 import { glMatrix, mat4 } from "gl-matrix";
 import { initBuffer, initShader, rotation } from "../../common/base";
-import { calculatePoint, createCircleMesh, createCubeMesh, createLineMesh, createRectangleMesh, createStarMesh, createTriangleMesh } from "../../common/primative";
+import { 
+    calculatePoint,
+    createCircleMesh, 
+    createCubeMesh, 
+    createLineMesh, 
+    createRectangleMesh, 
+    createStarMesh, 
+    createTriangleMesh,
+
+ } from "../../common/primative";
 import { vertexShader2Demension, fragmentShader2Demension, vertexShader3Demension, fragmentShader3Demension } from "./shaders";
 type CallFunc = (webgl: WebGL2RenderingContext, program: WebGLProgram, angle?: number) => void;
 const WIN:any = window;
@@ -133,7 +142,7 @@ const circle: CallFunc = (webgl, program) => {
 const cube: CallFunc = (webgl, program, angle) => {
     const {vertex, color, count, pointer} = createCubeMesh();
     webgl.useProgram(program);
-    createMatrix(webgl, program, angle)
+    createMatrix(webgl, program, angle);
     initBuffer(webgl, program, vertex, "a_Position", 3, false);
     initBuffer(webgl, program, color, "a_Color", 3, false);
     initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
