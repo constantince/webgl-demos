@@ -64,6 +64,7 @@ export function initBuffer(
 			}
 			gl.vertexAttribPointer(target, size, gl.FLOAT, false, 0, 0);
 			gl.enableVertexAttribArray(target);
+			
 		}
 	}
 }

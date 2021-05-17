@@ -8,6 +8,8 @@ import {
     createRectangleMesh, 
     createStarMesh, 
     createTriangleMesh,
+    calculateCylinder_bak,
+    ConeMesh
 
  } from "../../common/primative";
 import { vertexShader2Demension, fragmentShader2Demension, vertexShader3Demension, fragmentShader3Demension } from "./shaders";
@@ -20,6 +22,7 @@ export function main(id: string) {
     webgl.enable(webgl.DEPTH_TEST);  
     const program2D = <WebGLProgram>initShader(webgl, vertexShader2Demension, fragmentShader2Demension);
     const program3D = <WebGLProgram>initShader(webgl, vertexShader3Demension, fragmentShader3Demension);
+
     var tick = () => {
         const ang = rotation(0, 45);
         switch(WIN.type) {
@@ -51,7 +54,16 @@ export function main(id: string) {
                 cube(webgl, program3D, ang);
                 break;
 
+            case "cylinder":
+                cylinder(webgl, program3D, ang);
+                break;
+
+            case "cone":
+                cone(webgl, program3D, ang);
+                break;
+
             default:
+                // cylinder(webgl, program3D, ang);
                 point(webgl, program2D);
                 break;
         }
@@ -68,7 +80,7 @@ function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, angl
 
     const lM = mat4.create()
     mat4.identity(lM);
-    mat4.lookAt(lM, [0, 0, 5], [0, 0, 0], [0, 1, 0]);
+    mat4.lookAt(lM, [0, 1, 5], [0, 0, 0], [0, 1, 0]);
 
     mat4.mul(vM, vM, lM);
 
@@ -139,13 +151,46 @@ const circle: CallFunc = (webgl, program) => {
     webgl.drawArrays(webgl.TRIANGLE_FAN, 0, count);
 }
 
+
 const cube: CallFunc = (webgl, program, angle) => {
     const {vertex, color, count, pointer} = createCubeMesh();
     webgl.useProgram(program);
-    createMatrix(webgl, program, angle);
+   
     initBuffer(webgl, program, vertex, "a_Position", 3, false);
     initBuffer(webgl, program, color, "a_Color", 3, false);
     initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
+   
+
+    createMatrix(webgl, program, angle);
     webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
     webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);
+
+}
+const cylinder: CallFunc = (webgl, program, angle) => {
+    const { colorArray, vertexsArray, len, pointerArray } = calculateCylinder_bak(.5, .5, .5, false);
+
+    webgl.useProgram(program);
+    initBuffer(webgl, program, vertexsArray, "a_Position", 3, false);
+    initBuffer(webgl, program, colorArray, "a_Color", 3, false);
+    initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
+   
+
+    createMatrix(webgl, program, angle);
+    webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
+    webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
+    
+}
+
+const cone: CallFunc = (webgl, program, angle) => {
+    const { colorArray, vertexsArray, len, pointerArray } = ConeMesh();
+
+    webgl.useProgram(program);
+    initBuffer(webgl, program, vertexsArray, "a_Position", 3, false);
+    initBuffer(webgl, program, colorArray, "a_Color", 3, false);
+    initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
+   
+
+    createMatrix(webgl, program, angle);
+    webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
+    webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
 }

@@ -30,6 +30,14 @@ const data = [{
     {
         name: "cube",
         word: "立方体-cube"
+    },
+    {
+        name: "cylinder",
+        word: "圆柱体-cylinder"
+    },
+    {
+        name: "cone",
+        word: "圆锥体-cone"
     }
 ]
 

@@ -71,10 +71,10 @@ module.exports = {
                     } : 'style-loader',
                     "css-loader",
 
-                    {loader: 'px2rem-loader', options: { //注意顺序
-                        remUnit: 75,
-                        remPrecision: 8,
-                    }},
+                    // {loader: 'px2rem-loader', options: { //注意顺序
+                    //     remUnit: 75,
+                    //     remPrecision: 8,
+                    // }},
                     "sass-loader",
                     
                     {

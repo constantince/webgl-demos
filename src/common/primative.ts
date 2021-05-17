@@ -56,7 +56,7 @@ export function createRectangleMesh(): Demention2 {
 		0.0, 0.3, 0.0,
 		0.0, 0.0, 0.0,
 		0.3, 0.3, 0.0,
-		0.3, -0.3, 0.0
+		0.3, 0.0, 0.0
 	]);
 
 	const color = new Float32Array([1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
@@ -509,7 +509,7 @@ export function calculateVertexSphere(
 
 // create cylinder
 //计算出圆柱体以及表面线条的各个点的位置
-export function calculateCylinder(height: number, radiusB: number, radiusT: number, empty: boolean) {
+export function calculateCylinder_bak(height: number, radiusB: number, radiusT: number, empty: boolean) {
 	//高，顶面圆中心点位置，粗细，分辨率，底面圆中心位置
 	const HEIGHT = height,
 		TOP = [0, HEIGHT, 0],
@@ -518,6 +518,7 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
 		theta = ((360 / RESOLUTION) * Math.PI) / 180;
 	let vertexs: number[] = [];
 	let normal: number[] = [];
+	let color: number[] = [];
 	// 分别计算出上下表面圆边上的点
 	for (let index = 0; index < RESOLUTION; index++) {
 		// top circle
@@ -528,6 +529,7 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
 		const z1 = Math.sin(theta * index) * radiusT;
 
 		vertexs.push(x, HEIGHT, z, x1, -1, z1);
+		color.push(1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 		normal.push(x, HEIGHT, z, x1, -1, z1);
 	}
 	// 其他点1~resolution 底部中心点的位置 resolution + 1; 顶点位置 resolution，
@@ -580,10 +582,46 @@ export function calculateCylinder(height: number, radiusB: number, radiusT: numb
 	const vertexsArray = new Float32Array(vertexs);
 	const pointerArray = new Uint16Array(pointer);
 	const normalArray = new Float32Array(normal);
+	const colorArray = new Float32Array(color);
 
-	return {vertexsArray, pointerArray, len: pointerArray.length, normalArray};
+	return {vertexsArray, pointerArray, len: pointerArray.length, normalArray, colorArray};
 }
+export function calculateCylinder() {
+	var h = 1,
+		r1 = 0.5,
+		r2 = 0.2,
+		nPhi = 100;
+	var pt = [],
+		nt = [];
+	var Phi = 0,
+		dPhi = (2 * Math.PI) / (nPhi - 1),
+		Nx = r1 - r2,
+		Ny = h,
+		N = Math.sqrt(Nx * Nx + Ny * Ny);
+	Nx /= N;
+	Ny /= N;
+	for (var i = 0; i < nPhi; i++) {
+		var cosPhi = Math.cos(Phi);
+		var sinPhi = Math.sin(Phi);
+		var cosPhi2 = Math.cos(Phi + dPhi / 2);
+		var sinPhi2 = Math.sin(Phi + dPhi / 2);
+		pt.push(-h / 2, cosPhi * r1, sinPhi * r1); // points
+		nt.push(Nx, Ny * cosPhi, Ny * sinPhi); // normals
+		pt.push(h / 2, cosPhi2 * r2, sinPhi2 * r2); // points
+		nt.push(Nx, Ny * cosPhi2, Ny * sinPhi2); // normals
+		Phi += dPhi;
+	}
 
+	const vertexsArray = new Float32Array(pt);
+	// const pointerArray = new Uint16Array(pointer);
+	const normalArray = new Float32Array(nt);
+
+	return {
+		vertexsArray,
+		normalArray,
+		len: 2 * nPhi,
+	};
+}
 export function newCylinder() {
 	var h = 1,
 		r1 = 0.5,
@@ -620,6 +658,55 @@ export function newCylinder() {
 		len: 2 * nPhi,
 	};
 }
+
+export function ConeMesh() {
+		const HEIGHT = 0.5,
+		TOP = [0, HEIGHT, 0], RADIUS = 0.5, RESOLUTION = 30, BOTTOM = [0, -0.5, 0],
+		theta = 360 / RESOLUTION * Math.PI / 180;
+		let vertexs:number[] = TOP;
+		let color:number[] = [];
+		for (let index = 0; index < RESOLUTION; index++) {
+			vertexs.push(Math.cos(theta * index) * RADIUS, -0.5, Math.sin(theta * index) * RADIUS);
+			color.push(1.0, 0.0, 0.0);
+		}
+		// 顶点位置0，其他点1~resolution 底部中心点的位置 resolution + 1;
+		vertexs.push(...BOTTOM);
+		color.push(1.0, 0.0, 0.0, 1.0, 0.0, 0.0,);
+		let pointer:number[] = [];
+		//斜边
+		for (let index = 0; index < RESOLUTION; index++) {
+			//永远是第一个顶点开始的
+			pointer.push(0, 1 + (index % RESOLUTION), 1 + ((index+1) % RESOLUTION)); // 顶部点的位置，在 0；
+		}
+		//底边
+		for (let index = 0; index < RESOLUTION; index++) {
+			// 永远是底部中心点开始的
+			pointer.push(RESOLUTION + 1, 1 + (index % RESOLUTION), 1 + ((index+1) % RESOLUTION));// 底部中心点的在vertexs中的位置 即 1 + RESOLUTION
+
+		}
+	
+		let lPointer:number[] = [];
+		//线条
+		for (let index = 1; index <= RESOLUTION; index++) {
+		  //永远是第一个顶点开始的
+		  lPointer.push(0); // 顶部点的位置，在 0；
+		  lPointer.push(1 + (index % RESOLUTION));
+	
+		  lPointer.push(1 + (index % RESOLUTION));
+		  lPointer.push(RESOLUTION + 1);
+		}
+	
+	
+	
+		const vertexsArray = new Float32Array(vertexs);
+		const pointerArray = new Uint16Array(pointer);
+		const colorArray = new Float32Array(color)
+		// lPointer = new Uint16Array(lPointer);
+	
+		return {vertexsArray, colorArray, pointerArray, lPointer, len: pointer.length};
+	
+}
+
 
 const VOB = {
 	CubeVertex: calculatePoints,
