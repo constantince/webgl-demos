@@ -622,6 +622,7 @@ export function calculateCylinder() {
 		len: 2 * nPhi,
 	};
 }
+
 export function newCylinder() {
 	var h = 1,
 		r1 = 0.5,
@@ -707,6 +708,59 @@ export function ConeMesh() {
 	
 }
 
+export function SphereMesh(radius: number, resolution: number) {
+	const RADIUS = radius, RESOLUTION = resolution;
+	const theta = (180 / RESOLUTION) * (Math.PI / 180);
+	const beta = (360 / RESOLUTION) * (Math.PI / 180);
+	//计算出圆体以及表面线条的各个点的位置
+    let vertexs:number[] = [], pointer:number[] = [], linePointer:number[] = [], color:number[] = [];
+     for (let index = 0; index <= RESOLUTION; index++) {
+         // 同等高度的Y值
+        const y = Math.cos(theta * index) * RADIUS;
+        // 底边作为斜边的长度
+        const d = Math.sin(theta * index) * RADIUS;
+        for (let index1 = 0; index1 <= RESOLUTION; index1++) {
+            // 斜边的余弦即是x轴的距离
+            const x = Math.cos(beta * index1) * d;
+            // 斜边的正弦即是Z轴的距离
+            const z = Math.sin(beta * index1) * d;
+            vertexs.push(x, y, z);
+         	color.push(1.0, 1.0, 0.0);
+        }
+     }
+
+    /* 计算出顶点的位置为 [0, 1,..... 一个循环之后, RESOLUTION, RESOLUTION + 1]
+     我们需要连接的是 0, 1, RESOLUTION 顶点的位置拼凑成一个三角形
+    */
+    for(var index = 0; index < Math.pow(RESOLUTION, 2); index ++)
+    {
+            pointer.push(index); // 本行第一个
+            pointer.push(index + RESOLUTION + 1); // 下一行第一个
+            pointer.push(index + 1); // 本行第二个
+
+            pointer.push(index + 1); // 本行第二个
+            pointer.push(index + RESOLUTION + 1); // 下一行第一个
+            pointer.push(index + RESOLUTION + 2); // 下一行第二个
+
+            //到此，一个四边形被拼凑成功
+
+            // 划线只需要沿着精度和纬度连接每个点即可
+            linePointer.push(index);
+            linePointer.push(index + 1);
+            linePointer.push(index);
+            linePointer.push(index + RESOLUTION + 1);
+
+
+    }
+
+    return {
+        vertexArray : new Float32Array( vertexs ),
+        pointerArray: new Uint16Array(pointer),
+        linePointer: new Uint16Array(linePointer),
+		colorArray: new Float32Array(color),
+		len: pointer.length
+    };
+}
 
 const VOB = {
 	CubeVertex: calculatePoints,

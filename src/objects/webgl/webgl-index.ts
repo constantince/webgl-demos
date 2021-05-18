@@ -1,5 +1,5 @@
 import { glMatrix, mat4 } from "gl-matrix";
-import { initBuffer, initShader, rotation } from "../../common/base";
+import { initBuffer, initEvent, initShader, rotation } from "../../common/base";
 import { 
     calculatePoint,
     createCircleMesh, 
@@ -9,7 +9,8 @@ import {
     createStarMesh, 
     createTriangleMesh,
     calculateCylinder_bak,
-    ConeMesh
+    ConeMesh,
+    SphereMesh
 
  } from "../../common/primative";
 import { vertexShader2Demension, fragmentShader2Demension, vertexShader3Demension, fragmentShader3Demension } from "./shaders";
@@ -22,7 +23,6 @@ export function main(id: string) {
     webgl.enable(webgl.DEPTH_TEST);  
     const program2D = <WebGLProgram>initShader(webgl, vertexShader2Demension, fragmentShader2Demension);
     const program3D = <WebGLProgram>initShader(webgl, vertexShader3Demension, fragmentShader3Demension);
-
     var tick = () => {
         const ang = rotation(0, 45);
         switch(WIN.type) {
@@ -62,6 +62,9 @@ export function main(id: string) {
                 cone(webgl, program3D, ang);
                 break;
 
+            case "sphere":
+                sphere(webgl, program3D, ang);
+                break;
             default:
                 // cylinder(webgl, program3D, ang);
                 point(webgl, program2D);
@@ -87,7 +90,6 @@ function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, angl
     const rM = mat4.create();
     mat4.identity(rM);
     mat4.rotate(rM, rM, glMatrix.toRadian(angle || 0), [0, 1, 0]);
-
     mat4.mul(vM, vM, rM);
 
     const u_MatrixLocation = webgl.getUniformLocation(program, "u_Matrix");
@@ -186,6 +188,19 @@ const cone: CallFunc = (webgl, program, angle) => {
 
     webgl.useProgram(program);
     initBuffer(webgl, program, vertexsArray, "a_Position", 3, false);
+    initBuffer(webgl, program, colorArray, "a_Color", 3, false);
+    initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
+   
+
+    createMatrix(webgl, program, angle);
+    webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
+    webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
+}
+
+const sphere: CallFunc = (webgl, program, angle) => {
+    const {colorArray, vertexArray, pointerArray, len} = SphereMesh(0.5, 50);
+    webgl.useProgram(program);
+    initBuffer(webgl, program, vertexArray, "a_Position", 3, false);
     initBuffer(webgl, program, colorArray, "a_Color", 3, false);
     initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
    

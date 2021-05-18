@@ -38,6 +38,10 @@ const data = [{
     {
         name: "cone",
         word: "圆锥体-cone"
+    },
+    {
+        name: "sphere",
+        word: "球体-sphere"
     }
 ]
 
