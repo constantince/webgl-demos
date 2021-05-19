@@ -3,6 +3,9 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const F = require('friendly-errors-webpack-plugin');
+const HappyPack = require('happypack');
+const os = require('os');
+const happyThreadPool = HappyPack.ThreadPool({ size: os.cpus().length });
 const glob = require('glob');
 const env = process.env.NODE_ENV;
 const setMPA = () => {
@@ -95,6 +98,18 @@ module.exports = {
         new CleanWebpackPlugin(),
           ...plugins,
           new MiniCssExtractPlugin(),
-          new F()
+          new F(),
+          new HappyPack({
+                //用id来标识 happypack处理那里类文件
+            id: 'happyBabel',
+            //如何处理  用法和loader 的配置一样
+            loaders: [{
+                loader: 'babel-loader?cacheDirectory=true',
+            }],
+            //共享进程池
+            threadPool: happyThreadPool,
+            //允许 HappyPack 输出日志
+            verbose: true,
+        })
     ]
 }
