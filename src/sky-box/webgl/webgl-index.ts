@@ -117,10 +117,7 @@ function createTexture(webgl: WebGL2RenderingContext, program: WebGLProgram, don
         webgl.activeTexture(webgl.TEXTURE0);
         webgl.bindTexture(webgl.TEXTURE_CUBE_MAP, texture);
         res.forEach(v => {
-            
-            // webgl.bindTexture(webgl.TEXTURE_CUBE_MAP, texture);
             webgl.texImage2D(v[1], 0,  webgl.RGBA, webgl.RGBA, webgl.UNSIGNED_BYTE, v[0]);
-           
         });
         webgl.generateMipmap(webgl.TEXTURE_CUBE_MAP);
         webgl.texParameteri(webgl.TEXTURE_CUBE_MAP, webgl.TEXTURE_MIN_FILTER, webgl.LINEAR_MIPMAP_LINEAR);
