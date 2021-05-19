@@ -19,18 +19,23 @@ export function main(id: string) {
         initBuffer(webgl, program, color, "a_Color", 3, false);
         initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
         createMatrix(webgl, program);
-        const u_FogFar = webgl.getUniformLocation(program, "u_FogFar");
-        const u_FogNear = webgl.getUniformLocation(program, "u_FogNear");
+        const u_fogDensity = webgl.getUniformLocation(program, "u_fogDensity");
+        // const u_FogNear = webgl.getUniformLocation(program, "u_FogNear");
         
 
         var tick = () => {
+            const ang = rotation(0, 45);
             webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-            webgl.uniform1f(u_FogNear, win.fogNear);
-            webgl.uniform1f(u_FogFar, win.fogFar);
+            webgl.uniform1f(u_fogDensity, win.u_fogDensity);
+            // webgl.uniform1f(u_FogFar, win.fogFar);
             for (let i = 0; i < 10; i++) {
                 const world = mat4.create();
                 mat4.identity(world);
                 mat4.translate(world, world, [-4 + i * 1.1, 0, -i * 2]);
+                const rotate = mat4.create();
+                mat4.identity(rotate);
+                mat4.rotate(rotate, rotate, glMatrix.toRadian(ang), [0, 1, 1]);
+                mat4.multiply(world, world, rotate)
                 const u_WorldMatrix = webgl.getUniformLocation(program, "u_WorldMatrix");
                 webgl.uniformMatrix4fv(u_WorldMatrix, false, world);
                 webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);

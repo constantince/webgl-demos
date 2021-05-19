@@ -56,7 +56,7 @@ const App: React.FC = props => {
         <Articles id="template" main={main} >
 
             <form>
-                <label>基础形状：</label>
+                <label>基础形状  ：</label>
                 <select onChange={select}>
                     {data.map(v => <option key={v.name} value={v.name} >{v.word}</option>)}
                 </select>

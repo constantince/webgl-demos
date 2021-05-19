@@ -65,6 +65,7 @@ export function main(id: string) {
             case "sphere":
                 sphere(webgl, program3D, ang);
                 break;
+                
             default:
                 // cylinder(webgl, program3D, ang);
                 point(webgl, program2D);

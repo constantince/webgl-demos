@@ -12,18 +12,18 @@ const App: React.FC = props => {
                 <form>
 
                     <label>
-                        fogNear：
+                        u_fogDensity:
                         <input type="range" onChange={(e) => {
-                            win.fogNear = e.target.value; 
-                        }} step="0.001" min="0" max="40" defaultValue="0"/>
+                            win.u_fogDensity = e.target.value; 
+                        }} step="0.001" min="0" max="1" defaultValue="0"/>
                     </label>
                         <br />
-                    <label>
+                    {/* <label>
                         fogFar：
                         <input type="range" onChange={(e) => {
                             win.fogFar = e.target.value; 
                         }} step="0.001" min="0" max="40" defaultValue="0"/>
-                    </label>
+                    </label> */}
 
                 </form>
             </div>
