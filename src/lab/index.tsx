@@ -4,11 +4,12 @@ import "../common/common.scss";
 import Articles from "../comps/canvas-area";
 import { main_buffer } from "./webgl/frame-buffer";
 import { main_shadow } from "./webgl/shadow";
+import { main_box } from "./webgl/box";
 
 const App: React.FC = props => {
 
     return <div className="container"> 
-        <Articles id="lab-expirement" main={main_shadow} />
+        <Articles id="lab-expirement" main={main_box} />
         <p>source code: <a></a></p>
         
         <footer className="footer-desc">Power up by Typescript, Webpack and Webgl2 </footer>
