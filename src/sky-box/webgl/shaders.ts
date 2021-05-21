@@ -32,3 +32,28 @@ export const fragmentShader = `#version 300 es
         FragColor = texture(u_Sampler, direction);
     }
 `;
+
+export const vertex_box = `#version 300 es
+
+    in vec4 a_Position;
+    out vec4 v_Position;
+
+    void main() {
+        v_Position = a_Position;
+        gl_Position = a_Position;
+        gl_Position.z = 1.0;
+    }
+`;
+
+export const frag_ment_box = `#version 300 es
+    precision highp float;
+    in vec4 v_Position;
+    uniform mat4 u_viewDirectionProjectionInverse;
+    out vec4 outColor;
+    uniform samplerCube u_Sampler;
+    void main() {
+        vec4 t = u_viewDirectionProjectionInverse * v_Position;
+        outColor = texture(u_Sampler, normalize(t.xyz / t.w));
+    }
+
+`
