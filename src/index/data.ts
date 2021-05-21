@@ -18,6 +18,10 @@ const data: List = {
         name: "太阳系-solar-system",
         path: "./solar-system.html"
     },
+    {
+        name: "天空盒-sky-box",
+        path: "./sky-box.html"
+    },
     // {
     //     name: "读过的书籍-Books I have read",
     //     path: "./books-i-have-read.html"

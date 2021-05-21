@@ -43,7 +43,7 @@ export function createTriangleMesh(): Demention2 {
 
 // create line
 export function createLineMesh(): Demention2 {
-	const vertex = new Float32Array([0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.4, 0.3, 0.0, 0.1, 0.6, 0.0]);
+	const vertex = new Float32Array([0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.4, 0.35, 0.0, 0.1, 0.6, 0.0]);
 
 	const color = new Float32Array([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
 	return {vertex, color, count: 0};
@@ -53,10 +53,10 @@ export function createLineMesh(): Demention2 {
 export function createRectangleMesh(): Demention2 {
 	//在webgl中定义好四个点的位置
 	const vertex = new Float32Array([ 
-		0.0, 0.3, 0.0,
+		0.0, 0.35, 0.0,
 		0.0, 0.0, 0.0,
-		0.3, 0.3, 0.0,
-		0.3, 0.0, 0.0
+		0.35, 0.35, 0.0,
+		0.35, 0.0, 0.0
 	]);
 
 	const color = new Float32Array([1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]);
@@ -124,12 +124,12 @@ export function createCircleMesh(resolution: number, radius: number): Demention2
 // create cube
 export function createCubeMesh():Demention3 {
 	const vertex = new Float32Array([
-	0.3, 0.3, 0.3,  -0.3, 0.3, 0.3,  -0.3,-0.3, 0.3,   0.3,-0.3, 0.3, // v0-v1-v2-v3 front
-     0.3, 0.3, 0.3,   0.3,-0.3, 0.3,   0.3,-0.3,-0.3,   0.3, 0.3,-0.3, // v0-v3-v4-v5 right
-     0.3, 0.3, 0.3,   0.3, 0.3,-0.3,  -0.3, 0.3,-0.3,  -0.3, 0.3, 0.3, // v0-v5-v6-v1 up
-    -0.3, 0.3, 0.3,  -0.3, 0.3,-0.3,  -0.3,-0.3,-0.3,  -0.3,-0.3, 0.3, // v1-v6-v7-v2 left
-    -0.3,-0.3,-0.3,   0.3,-0.3,-0.3,   0.3,-0.3, 0.3,  -0.3,-0.3, 0.3, // v7-v4-v3-v2 down
-     0.3,-0.3,-0.3,  -0.3,-0.3,-0.3,  -0.3, 0.3,-0.3,   0.3, 0.3,-0.3  // v4-v7-v6-v5 back
+		0.35, 0.35, 0.35,  -0.35, 0.35, 0.35,  -0.35,-0.35, 0.35,   0.35,-0.35, 0.35, // v0-v1-v2-v3 front
+		0.35, 0.35, 0.35,   0.35,-0.35, 0.35,   0.35,-0.35,-0.35,   0.35, 0.35,-0.35, // v0-v3-v4-v5 right
+		0.35, 0.35, 0.35,   0.35, 0.35,-0.35,  -0.35, 0.35,-0.35,  -0.35, 0.35, 0.35, // v0-v5-v6-v1 up
+		-0.35, 0.35, 0.35,  -0.35, 0.35,-0.35,  -0.35,-0.35,-0.35,  -0.35,-0.35, 0.35, // v1-v6-v7-v2 left
+		-0.35,-0.35,-0.35,   0.35,-0.35,-0.35,   0.35,-0.35, 0.35,  -0.35,-0.35, 0.35, // v7-v4-v3-v2 down
+		0.35,-0.35,-0.35,  -0.35,-0.35,-0.35,  -0.35, 0.35,-0.35,   0.35, 0.35,-0.35  // v4-v7-v6-v5 back
 	]);
 
 	const color = new Float32Array([
