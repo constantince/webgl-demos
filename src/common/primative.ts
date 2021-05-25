@@ -1,5 +1,5 @@
 //计算出立方体的各个点的位置
-type VertexObjectsBuffer = {
+export type VertexObjectsBuffer = {
 	vertexs: Float32Array;
 	color: Float32Array;
 	pointer: Uint16Array;
@@ -17,7 +17,7 @@ type Demention2 = {
 	count: number;
 };
 
-type Demention3 = Demention2 & {
+export type Demention3 = Demention2 & {
 	pointer: Uint16Array,
 	normal: Float32Array,
 	texcoord: Float32Array
@@ -133,12 +133,12 @@ export function createCubeMesh():Demention3 {
 	]);
 
 	const color = new Float32Array([
-		1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 1,     // v0-v1-v2-v3 front
-		1, 1, 0,   1, 0, 0,   1, 1, 0,  1, 0, 0,     // v0-v3-v4-v5 right
-		1, 0, 0,   1, 1, 0,   1, 0, 0,  1, 1, 0,     // v0-v5-v6-v1 up
-		1, 0, 0,   1, 0, 1,   1, 0, 0,  1, 0, 0,     // v1-v6-v7-v2 left
-		1, 0, 0,   1, 1, 0,   1, 0, 0,  1, 0, 0,     // v7-v4-v3-v2 down
-		1, 0, 1,   1, 1, 0,   1, 0, 1,  1, 0, 1　    // v4-v7-v6-v5 back
+		1, 0, 0,   1, 1, 0,   1, 0.36, 0,  1, .33, 1,     // v0-v1-v2-v3 front
+		.25, 1, 0,   1, 0, 0,   .31, 1, 0,  1, 0, 0,     // v0-v3-v4-v5 right
+		1, 0, 0,   1, .89, 0,   1, 0, 0,  1, 1, 0,     // v0-v5-v6-v1 up
+		1, .59, 0,   1, 0, 1,   1, 0.21, 0,  1, .26, 0,     // v1-v6-v7-v2 left
+		1, .45, 0,   .62, 1, 0,   1, 0, 0,  1, 0, 0,     // v7-v4-v3-v2 down
+		1, 0, 1,   1, .28, 0,   1, 0, 1,  .55, 0, 1　    // v4-v7-v6-v5 back
 	]);
 
 	const normal = new Float32Array([

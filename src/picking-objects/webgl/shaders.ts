@@ -19,3 +19,24 @@ export const fragmentShader = `#version 300 es
         FragColor = v_Color;
     }
 `;
+
+export const fb_vertexShader = `#version 300 es
+    in vec4 a_Position;
+    uniform mat4 u_Matrix;
+
+    void main() {
+        gl_Position = u_Matrix * a_Position;
+    }
+`;
+
+
+export const fb_fragmentShader = `#version 300 es
+    precision mediump float;
+    out vec4 FragColor;
+    uniform vec4 u_id;
+
+    void main() {
+        FragColor = vec4(0, 0, 0, 1);
+    }
+
+`;
