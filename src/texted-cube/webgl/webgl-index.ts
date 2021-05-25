@@ -1,6 +1,6 @@
-import { glMatrix, mat4 } from "gl-matrix";
-import { initBuffer, initShader, rotation } from "../../common/base";
-import { createCubeMesh } from "../../common/primative";
+import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { initBuffer, initEvent, initShader, rotation } from "../../common/base";
+import { createCubeMesh, calculateVertexSphere } from "../../common/primative";
 import {vertexShader, fragmentShader } from "./shaders";
 export function main(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
@@ -9,20 +9,21 @@ export function main(id: string) {
     webgl.enable(webgl.DEPTH_TEST);
 
     const program = initShader(webgl, vertexShader, fragmentShader);
-
+    let ro = [0,0,0];
+    initEvent(canvas, ro)
     if( program ) {
         webgl.useProgram(program);
-        const {color, count, vertex, normal, texcoord, pointer} = createCubeMesh();
-        initBuffer(webgl, program, vertex, "a_Position", 3, false);
+        const {color, len, vertexs, normal, texcoord, pointer} = calculateVertexSphere();
+        initBuffer(webgl, program, vertexs, "a_Position", 3, false);
         // initBuffer(webgl, program, color, "a_Color", 3, false);
         initBuffer(webgl, program, texcoord, "a_TexCoord", 2, false);
         initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
-        createTexture(webgl, program, canvasTexture("HELLO WEBGL", 150, 150));
+        createTexture(webgl, program, canvasTexture("TO BE OR NOT TO BE, THAT IS A QUESTION. HELLO WEBGL", 1000, 1000));
         var tick = () => {
-            const a = rotation(0, 45);
-            createMatrix(webgl, program, a);
+            // const a = rotation(0, 45);
+            createMatrix(webgl, program, ro);
             webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-            webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);
+            webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
             window.requestAnimationFrame(tick);
         }
 
@@ -32,7 +33,7 @@ export function main(id: string) {
     
 }
 
-function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, angle?:number) {
+function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, angle:number[]) {
     const vM = mat4.create();
     mat4.identity(vM);
     mat4.perspective(vM, glMatrix.toRadian(30), 1, 1, 100);
@@ -45,12 +46,16 @@ function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, angl
 
     const rM = mat4.create();
     mat4.identity(rM);
-    mat4.rotate(rM, rM, glMatrix.toRadian(angle || 0), [0, 1, 0]);
+    mat4.rotateX(rM, rM, glMatrix.toRadian(angle[0]));
+    mat4.rotateY(rM, rM, glMatrix.toRadian(angle[1]));
+    mat4.rotateZ(rM, rM, glMatrix.toRadian(angle[2]));
+    // mat4.rotate(rM, rM, glMatrix.toRadian(angle || 0), [0, 1, 0]);
     mat4.mul(vM, vM, rM);
 
     const u_MatrixLocation = webgl.getUniformLocation(program, "u_Matrix");
     webgl.uniformMatrix4fv(u_MatrixLocation, false, vM);
 }
+
 
 function createTexture(webgl: WebGL2RenderingContext, program: WebGLProgram, word: HTMLCanvasElement) {
     const texture = webgl.createTexture();
