@@ -13,21 +13,21 @@ export function main_box(id: string) {
 
     const program = initShader(webgl, vertex_box, frag_ment_box);
 
-    if( program ) {
+    if (program) {
 
         webgl.useProgram(program);
 
         const vertex = new Float32Array([
             -1, -1,
             1, -1,
-           -1,  1,
-           -1,  1,
+            -1, 1,
+            -1, 1,
             1, -1,
-            1,  1,
+            1, 1,
         ]);
         initBuffer(webgl, program, vertex, "a_Position", 2, false);
 
-        var tick = (time:number) => {
+        var tick = (time: number) => {
             // convert to seconds
             time *= 0.001;
             // rotate 45 degree per second.
@@ -43,19 +43,19 @@ export function main_box(id: string) {
             window.requestAnimationFrame(tick);
         });
 
-       
-        
+
+
 
     }
 }
 
-function createMatrix(webgl:WebGL2RenderingContext, program: WebGLProgram, time:number): mat4 {
+function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, time: number): mat4 {
     const u_CameraPositionValue = vec3.fromValues(Math.cos(time * .1), 0, Math.sin(time * .1));
-    const  pM = mat4.create();
+    const pM = mat4.create();
     mat4.identity(pM);
     mat4.perspective(pM, glMatrix.toRadian(60), 1, 1, 100);
 
-    const  vM = mat4.create();
+    const vM = mat4.create();
     mat4.identity(vM);
     mat4.lookAt(vM, u_CameraPositionValue, [0, 0, 0], [0, 1, 0]);
 
@@ -69,11 +69,11 @@ function createMatrix(webgl:WebGL2RenderingContext, program: WebGLProgram, time:
 
     const u_viewDirectionProjectionInverse = webgl.getUniformLocation(program, "u_viewDirectionProjectionInverse");
     const u_samplerLocation = webgl.getUniformLocation(program, "u_Sampler");
-    
+
     webgl.uniformMatrix4fv(u_viewDirectionProjectionInverse, false, uM);
     webgl.uniform1i(u_samplerLocation, 0);
-     // let our quad pass the depth test at 1.0
-     webgl.depthFunc(webgl.LEQUAL);
+    // let our quad pass the depth test at 1.0
+    webgl.depthFunc(webgl.LEQUAL);
 
     return vM;
 }
@@ -84,25 +84,25 @@ type IMAGE = {
     src: string
 }
 
-function loadImage (images: IMAGE[]): Promise<[HTMLImageElement, number]>[] {
+function loadImage(images: IMAGE[]): Promise<[HTMLImageElement, number]>[] {
     return images.map(v => {
         // webgl.texImage2D(v.target, 0,  webgl.RGBA, webgl.RGBA, webgl.UNSIGNED_BYTE, new Image());
         // webgl.generateMipmap(webgl.TEXTURE_CUBE_MAP);
         // webgl.texParameteri(webgl.TEXTURE_CUBE_MAP, webgl.TEXTURE_MIN_FILTER, webgl.LINEAR_MIPMAP_LINEAR);
         return new Promise((reslove, reject) => {
             const image = new Image();
-            image.onload = function() {
+            image.onload = function () {
                 reslove([image, v.target]);
             }
             image.crossOrigin = "anonymous"
             image.src = v.src;
         });
-       
+
     });
 }
 
-function createTexture(webgl: WebGL2RenderingContext, program: WebGLProgram, done: {(): void}) {
-    const IMAGES:IMAGE[] = [
+function createTexture(webgl: WebGL2RenderingContext, program: WebGLProgram, done: { (): void }) {
+    const IMAGES: IMAGE[] = [
         {
             target: webgl.TEXTURE_CUBE_MAP_POSITIVE_X,
             src: 'https://webgl2fundamentals.org/webgl/resources/images/computer-history-museum/pos-x.jpg',
@@ -129,21 +129,21 @@ function createTexture(webgl: WebGL2RenderingContext, program: WebGLProgram, don
         }
     ];
 
-    
+
     Promise.all(loadImage(IMAGES)).then(res => {
-        const texture  = webgl.createTexture();
+        const texture = webgl.createTexture();
         webgl.activeTexture(webgl.TEXTURE0);
         webgl.bindTexture(webgl.TEXTURE_CUBE_MAP, texture);
         res.forEach(v => {
-            webgl.texImage2D(v[1], 0,  webgl.RGBA, webgl.RGBA, webgl.UNSIGNED_BYTE, v[0]);
+            webgl.texImage2D(v[1], 0, webgl.RGBA, webgl.RGBA, webgl.UNSIGNED_BYTE, v[0]);
         });
         webgl.generateMipmap(webgl.TEXTURE_CUBE_MAP);
         webgl.texParameteri(webgl.TEXTURE_CUBE_MAP, webgl.TEXTURE_MIN_FILTER, webgl.LINEAR_MIPMAP_LINEAR);
-       
+
         done && done();
     });
-    
-    
 
-    
+
+
+
 }
