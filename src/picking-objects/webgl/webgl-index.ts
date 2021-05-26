@@ -42,12 +42,13 @@ export function main(id: string) {
 
             // // draw sence
             const p = element.program;
-            webgl.useProgram(p);
+           
             webgl.bindFramebuffer(webgl.FRAMEBUFFER, null);
             // if( fbo ) {
             //     webgl.activeTexture(webgl.TEXTURE0);
             //     webgl.bindTexture(webgl.TEXTURE_2D, fbo.texture);
             // }
+            webgl.useProgram(p);
             initBuffer(webgl, p, element.buffer.vertex, "a_Position", 3, false);
             initBuffer(webgl, p, element.buffer.color, "a_Color", 3, false);
             initBuffer(webgl, p, element.buffer.pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
