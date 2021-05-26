@@ -586,6 +586,7 @@ export function calculateCylinder_bak(height: number, radiusB: number, radiusT: 
 
 	return {vertexsArray, pointerArray, len: pointerArray.length, normalArray, colorArray};
 }
+
 export function calculateCylinder() {
 	var h = 1,
 		r1 = 0.5,
@@ -761,6 +762,8 @@ export function SphereMesh(radius: number, resolution: number) {
 		len: pointer.length
     };
 }
+
+
 
 const VOB = {
 	CubeVertex: calculatePoints,
