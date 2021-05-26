@@ -9,7 +9,7 @@ import { main_box } from "./webgl/box";
 const App: React.FC = props => {
 
     return <div className="container"> 
-        <Articles id="lab-expirement" main={main_box} />
+        <Articles id="lab-expirement" main={main_shadow} />
         <p>source code: <a></a></p>
         
         <footer className="footer-desc">Power up by Typescript, Webpack and Webgl2 </footer>
