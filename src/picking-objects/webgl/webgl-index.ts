@@ -1,31 +1,31 @@
 import { createFrameBuffer, initBuffer, initShader, rotation} from "../../common/base";
 import { fb_fragmentShader, fb_vertexShader, fragmentShader, vertexShader } from "./shaders";
 import { createCubeMesh, Demention3 } from "../../common/primative";
-import { glMatrix, mat4, ReadonlyVec3, vec3 } from "gl-matrix";
+import { glMatrix, mat4, vec3 } from "gl-matrix";
 
 const OFFSCREEN_WIDTH = 500;
 const OFFSCREEN_HEIGHT = 500;
-
+let _x = 0, _y = 0, open = false;
 
 export function main(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
-    const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2", {preserveDrawingBuffer: true});
+    const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2");
     webgl.clearColor(0.0, 0.0, 0.0, 1.0);
     webgl.enable(webgl.DEPTH_TEST);
     webgl.enable(webgl.CULL_FACE);
 
     initPickingAction(webgl, canvas);
     
-    const allObject = createAllObjects(webgl, 4);
-
+    const allObject = createAllObjects(webgl, 5);
+    // draw framebuffer;
+    const fbo = createFrameBuffer(webgl, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
     var tick = () => {
         
         webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
+        
         allObject.forEach(element => {
             var ang = rotation(element.startAngle, 45);
 
-            // draw framebuffer;
-            const fbo = createFrameBuffer(webgl, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT);
             if( fbo ) {
                 const fp = element.fbo_program;
                 webgl.useProgram(fp);
@@ -39,15 +39,22 @@ export function main(id: string) {
                 webgl.drawElements(webgl.TRIANGLES, element.buffer.count, webgl.UNSIGNED_SHORT, 0);
             }
           
-
             // // draw sence
             const p = element.program;
-            webgl.useProgram(p);
+            var data = new Uint8Array(4);
+            if(open) {
+                webgl.readPixels(_x, _y, 1, 1, webgl.RGBA, webgl.UNSIGNED_BYTE, data);
+                console.log(data);
+                open = false;
+            }
+            // 
+            
             webgl.bindFramebuffer(webgl.FRAMEBUFFER, null);
             // if( fbo ) {
             //     webgl.activeTexture(webgl.TEXTURE0);
             //     webgl.bindTexture(webgl.TEXTURE_2D, fbo.texture);
             // }
+            webgl.useProgram(p);
             initBuffer(webgl, p, element.buffer.vertex, "a_Position", 3, false);
             initBuffer(webgl, p, element.buffer.color, "a_Color", 3, false);
             initBuffer(webgl, p, element.buffer.pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
@@ -76,9 +83,9 @@ function createAllObjects(webgl: WebGL2RenderingContext, count: number): objectI
     
     for (let index = 0; index < count; index++) {
         const item = {
-            fbo_program:  <WebGLProgram>initShader(webgl, fb_vertexShader, fb_fragmentShader),
+            fbo_program:  <WebGLProgram>initShader(webgl, fb_vertexShader, fb_fragmentShader, [0, 1]),
             buffer: buffer,
-            program: <WebGLProgram>initShader(webgl, vertexShader, fragmentShader),
+            program: <WebGLProgram>initShader(webgl, vertexShader, fragmentShader, [0, 1]),
             position: [(index - 2), 0, 0],
             startAngle: (index * 45) % 360,
             u_id: [
@@ -99,10 +106,13 @@ function initPickingAction(webgl: WebGL2RenderingContext,canvas: HTMLCanvasEleme
     canvas.addEventListener("mousedown", (e) => {
         const x = e.clientX, y = e.clientY;
         var rect = canvas.getBoundingClientRect();
-        var data = new Uint8Array(4);
-        console.log('x:', x - rect.left, ',', 'y:', y - rect.top);
-        webgl.readPixels(x - rect.left, y - rect.top, 1, 1, webgl.RGBA, webgl.UNSIGNED_BYTE, data);
-        console.log(data);
+       
+        _x =  x - rect.left;
+        _y =  y - rect.top;
+        open = true;
+        // console.log(_x, _y);
+        // webgl.readPixels(x - rect.left, y - rect.top, 1, 1, webgl.RGBA, webgl.UNSIGNED_BYTE, data);
+        // console.log(data);
 
     })
 }

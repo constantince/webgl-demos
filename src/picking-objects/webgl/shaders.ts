@@ -36,7 +36,7 @@ export const fb_fragmentShader = `#version 300 es
     uniform vec4 u_id;
 
     void main() {
-        FragColor = vec4(0, 0, 0, 1);
+        FragColor = u_id;
     }
 
 `;

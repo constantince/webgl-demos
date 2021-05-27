@@ -18,11 +18,15 @@ function _loaderShader(gl: W2RC, type: number, source: string): WebGLShader | nu
 	return null;
 }
 // create a webgl program
-export function createProgram(gl: W2RC, shader1: WebGLShader, shader2: WebGLShader): WebGLProgram | null {
+export function createProgram(gl: W2RC, shader1: WebGLShader, shader2: WebGLShader, position?: number[]): WebGLProgram | null {
 	const program = gl.createProgram();
 	if (program) {
 		gl.attachShader(program, shader1);
 		gl.attachShader(program, shader2);
+		if( position && position.length > 0) {
+			gl.bindAttribLocation(program, position[0], 'a_Position');
+			gl.bindAttribLocation(program, position[1], 'a_Color');
+		}
 		gl.linkProgram(program);
 		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
 			const info = gl.getProgramInfoLog(program);
@@ -33,12 +37,13 @@ export function createProgram(gl: W2RC, shader1: WebGLShader, shader2: WebGLShad
 	}
 	return null;
 }
+
 // initial the shaders
-export function initShader(gl: W2RC, v: string, f: string): WebGLProgram | null {
+export function initShader(gl: W2RC, v: string, f: string, position?:number[]): WebGLProgram | null {
 	const vShader = _loaderShader(gl, gl.VERTEX_SHADER, v);
 	const fShader = _loaderShader(gl, gl.FRAGMENT_SHADER, f);
 	if (!vShader || !fShader) return null;
-	const program = createProgram(gl, vShader, fShader);
+	const program = createProgram(gl, vShader, fShader, position);
 	return program;
 }
 // initial the buffers
