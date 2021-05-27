@@ -133,12 +133,12 @@ export function createCubeMesh():Demention3 {
 	]);
 
 	const color = new Float32Array([
-		1, 0, 0,   1, 1, 0,   1, 0.36, 0,  1, .33, 1,     // v0-v1-v2-v3 front
-		.25, 1, 0,   1, 0, 0,   .31, 1, 0,  1, 0, 0,     // v0-v3-v4-v5 right
-		1, 0, 0,   1, .89, 0,   1, 0, 0,  1, 1, 0,     // v0-v5-v6-v1 up
-		1, .59, 0,   1, 0, 1,   1, 0.21, 0,  1, .26, 0,     // v1-v6-v7-v2 left
-		1, .45, 0,   .62, 1, 0,   1, 0, 0,  1, 0, 0,     // v7-v4-v3-v2 down
-		1, 0, 1,   1, .28, 0,   1, 0, 1,  .55, 0, 1　    // v4-v7-v6-v5 back
+		0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  // v0-v1-v2-v3 front(blue)
+		0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  // v0-v3-v4-v5 right(green)
+		1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  // v0-v5-v6-v1 up(red)
+		1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  // v1-v6-v7-v2 left
+		1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  // v7-v4-v3-v2 down
+		0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0   // v4-v7-v6-v5 back
 	]);
 
 	const normal = new Float32Array([
@@ -586,6 +586,7 @@ export function calculateCylinder_bak(height: number, radiusB: number, radiusT: 
 
 	return {vertexsArray, pointerArray, len: pointerArray.length, normalArray, colorArray};
 }
+
 export function calculateCylinder() {
 	var h = 1,
 		r1 = 0.5,
@@ -761,6 +762,8 @@ export function SphereMesh(radius: number, resolution: number) {
 		len: pointer.length
     };
 }
+
+
 
 const VOB = {
 	CubeVertex: calculatePoints,
