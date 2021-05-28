@@ -131,12 +131,13 @@ function createMatrix(webgl: WebGL2RenderingContext, program: WebGLProgram, angl
     const rM = mat4.create();
     mat4.identity(rM);
 
-    const p = vec3.fromValues(position[0], position[1], position[2]);
+    const p = vec3.fromValues(position[0], position[1] - 4, position[2]);
     mat4.translate(rM, rM, p);
 
     mat4.rotateX(rM, rM, glMatrix.toRadian(angle[0]));
     mat4.rotateY(rM, rM, glMatrix.toRadian(angle[1]));
     mat4.rotateZ(rM, rM, glMatrix.toRadian(angle[2]));
+    mat4.translate(rM, rM, [0, 2, 0])
 
     
     // mat4.rotate(rM, rM, glMatrix.toRadian(angle || 0), [0, 1, 0]);
