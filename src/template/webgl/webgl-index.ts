@@ -31,7 +31,7 @@ function initPickingAction(canvas: HTMLCanvasElement) {
         const x = e.clientX, y = e.clientY;
         var rect = canvas.getBoundingClientRect();
         w.px = x - rect.left;
-        w.py = y - rect.top;
+        w.py = rect.bottom - y;
     })
 }
 
