@@ -8,8 +8,6 @@ const vertexShader = `#version 300 es
     out vec4 v_Color;
     void main() {
         gl_Position = u_Matrix * a_Position;
-        gl_PointSize = 5.0;
-
     }
 `;
 
@@ -80,7 +78,7 @@ function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, p
 }
 
 // create Floor 0.1 * 0.1 per 1 squat
-export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingContext, paneSize: number) => {
+export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingContext, paneSize: number, paneColor: string | null) => {
     const program = initShader(webgl, vertexShader, fragmentShader);
     if( program ) {
         const {vertexArray, count, pointerArray, pointerLineArray, lineCount} = createVertex(paneSize);
@@ -101,9 +99,12 @@ export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingConte
             webgl.drawElements(webgl.LINES, lineCount, webgl.UNSIGNED_SHORT, 0);
     
             // draw triangles.
-            initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
-            webgl.uniform1i(f_Line, 0);
-            webgl.drawElements(webgl.TRIANGLE_STRIP, count, webgl.UNSIGNED_SHORT, 0);
+            if( paneColor ) {
+                initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
+                webgl.uniform1i(f_Line, 0);
+                webgl.drawElements(webgl.TRIANGLE_STRIP, count, webgl.UNSIGNED_SHORT, 0);
+            }
+           
        }
     } else {
         return function(){}

@@ -10,14 +10,18 @@ type Props = {
     children?: JSX.Element
 }
 
-const CanvasArea: React.FC<Props> = ({id, height = 500, width = 500, main, children}) => {
+const CanvasArea: React.FC<Props> = ({id, main, children}) => {
 
     useEffect(() => {
         main(id);
     },[])
 
     return <div className="new-scence">
-            <canvas id={id} height={height} width={width}></canvas>
+            <header>
+                <p>title: CHEN YAN'S WEBGL LAB CHAPHTER 0: TEMPLATE</p>
+                <p>here input your description for the chapter.</p>
+            </header>
+            <canvas id={id}></canvas>
             <div className="control-area">
                 {children}
             </div>

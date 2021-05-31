@@ -1,11 +1,11 @@
 .new-scence {
     display: flex;
-    width: 800px;
-    height: 800px;
+    width: 100%;
+    height: 500px;
     flex-direction: column;
     canvas {
-        width: 500px;
-        height:500px;
+        width: inherit;
+        height: inherit;
     }
     .control-area {
         height: 300px;
