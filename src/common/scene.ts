@@ -84,7 +84,7 @@ export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingConte
     const program = initShader(webgl, vertexShader, fragmentShader);
     if( program ) {
         const {vertexArray, count, pointerArray, pointerLineArray, lineCount} = createVertex(paneSize);
-        console.log(vertexArray, pointerArray, pointerLineArray);
+        // console.log(vertexArray, pointerArray, pointerLineArray);
        
         
        return (time: number = 1) => {
