@@ -78,7 +78,7 @@ function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, p
 }
 
 // create Floor 0.1 * 0.1 per 1 squat
-export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingContext, paneSize: number, paneColor: string | null) => {
+export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingContext, paneSize: number, ratio: number, paneColor: string | null) => {
     const program = initShader(webgl, vertexShader, fragmentShader);
     if( program ) {
         const {vertexArray, count, pointerArray, pointerLineArray, lineCount} = createVertex(paneSize);

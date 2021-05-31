@@ -5,9 +5,9 @@ import Articles from "../comps/new-scene";
 import { main } from "./webgl/webgl-index";
 
 const w:any = window;
-w.x = 1.8;
-w.y = 1.8,
-w.z = 1.8
+w.x = 1;
+w.y = 1,
+w.z = -1.5
 type Postion = "x" | "y" | "z";
 
 const App: React.FC = props => {
@@ -26,7 +26,7 @@ const App: React.FC = props => {
                 <form>
                     <div>
                         X: 
-                        <input type="range" step={0.5} max="50" defaultValue="0" min="-50" onChange={(e) => {
+                        <input type="range" step={0.5} max="50" defaultValue="1" min="-50" onChange={(e) => {
                             changeLight("x", e.target.value);
                             setPX(e.target.value);
                         }} />
@@ -34,7 +34,7 @@ const App: React.FC = props => {
                     </div>
                     <div>
                         Y:
-                        <input type="range" step={0.5} max="50" defaultValue="0" min="-50" onChange={(e) => {
+                        <input type="range" step={0.5} max="50" defaultValue="1" min="-50" onChange={(e) => {
                             changeLight("y", e.target.value);
                             setPY(e.target.value);
                         }} />
@@ -42,7 +42,7 @@ const App: React.FC = props => {
                     </div>
                     <div>
                         Z:
-                        <input type="range" step={0.5} max="50" defaultValue="0" min="-50" onChange={(e) => {
+                        <input type="range" step={0.5} max="50" defaultValue="-1.5" min="-50" onChange={(e) => {
                             changeLight("z", e.target.value);
                             setPZ(e.target.value);
                         }} />
