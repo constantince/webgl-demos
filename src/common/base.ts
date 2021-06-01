@@ -253,6 +253,42 @@ export function initEvent(canvas:HTMLCanvasElement, currentAngle: number[]) {
 	}
 }
 
+export function InitDraggingAction(canvas:HTMLCanvasElement, Camera: (timer: number, x: number, y: number) => void) {
+
+	let dragging = false, lastX = -1, lastY = -1,  newX = 0, newY = 0;
+	canvas.onmousedown = function(ev: MouseEvent) {
+		const x = ev.clientX, y = ev.clientY;
+
+		const rect = canvas.getBoundingClientRect();
+
+		if( rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom ) {
+			lastX = x; lastY = y;
+			dragging = true;
+		}
+
+
+	}
+
+
+	canvas.onmouseup = function(ev) {
+		dragging = false;
+	}
+
+	canvas.onmousemove = function(ev) {
+		const x = ev.clientX, y = ev.clientY;
+		if( dragging && typeof Camera === "function") {
+			const factor = 50 / canvas.height;
+			const dx = factor * (x - lastX);
+			const dy = factor * (y - lastY);
+			newX += dx; newX %= 360; newY += dy; newY %= 360;
+			Camera(0, newY, newX);
+			// console.log(newX, lastX);;
+		}
+
+		lastX = x, lastY = y;
+	}
+}
+
 export function resizeCanvasToDisplaySize(canvas:HTMLCanvasElement) {
     // Lookup the size the browser is displaying the canvas in CSS pixels.
     const displayWidth  = canvas.clientWidth;

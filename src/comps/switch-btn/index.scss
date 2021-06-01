@@ -1,0 +1,13 @@
+.swither {
+    display: flex;
+    flex-direction: row-reverse;
+    color: #FFF;
+    .swith-viewer {
+        background: #003a8c;
+        padding: 10px 20px;
+    }
+    .swith-source{
+        background: #fff;
+        padding: 10px 20px;
+    }
+}

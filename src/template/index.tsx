@@ -3,7 +3,7 @@ import ReactDom from "react-dom";
 import "../common/common.scss";
 import Articles from "../comps/new-scene";
 import { main } from "./webgl/webgl-index";
-
+import SwithBtn from "../comps/switch-btn";
 const w:any = window;
 w.x = 1;
 w.y = 1,
@@ -22,8 +22,9 @@ const App: React.FC = props => {
     return <div className="container"> 
         <Articles id="template" main={main} >
         <div>
-                <p>视图</p>
-                <form>
+        <SwithBtn href="https://github.com/constantince" />
+                {/* <p>视图</p>
+                <form> 
                     <div>
                         X: 
                         <input type="range" step={0.5} max="50" defaultValue="1" min="-50" onChange={(e) => {
@@ -48,8 +49,11 @@ const App: React.FC = props => {
                         }} />
                         { positionZ }
                     </div>
-                </form>
-            </div>
+                </form>*/}
+        
+
+        
+        </div>
 
         </Articles>
         <footer className="footer-desc">Power up by Typescript, Webpack and Webgl2 </footer>

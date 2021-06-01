@@ -64,6 +64,7 @@
     "webpack-merge": "^5.1.4"
   },
   "dependencies": {
+    "antd": "^4.16.1",
     "gl-matrix": "^3.3.0"
   }
 }

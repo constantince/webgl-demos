@@ -45,40 +45,32 @@ export const fragmentShader_frame = `#version 300 es
 const w: any = window;
 
 export function makeCube (canvas: HTMLCanvasElement, webgl: WebGL2RenderingContext) {
-    const id = 2;
-    const uid = [
-        ((id >>  0) & 0xFF) / 0xFF,
-        ((id >>  8) & 0xFF) / 0xFF,
-        ((id >> 16) & 0xFF) / 0xFF,
-        ((id >> 24) & 0xFF) / 0xFF,
-      ];
     const program = initShader(webgl, vertexShader, fragmentShader, [0, 1]);
     const fprogram = initShader(webgl, vertexShader_frame, fragmentShader_frame, [0, 1]);
     const fbo = createFrameBuffer(webgl, 500, 500);
     const {color, vertex, pointer, count} = createCubeMesh();
 
-    const uM = mat4.create();
-   
+
 
     if(program && fprogram) {
             return {
-                drawFrameBuffer: (time:number) => {
+                drawFrameBuffer: (time:number, x: number, y:number) => {
                     if( fbo ) {
                         webgl.useProgram(fprogram);
                         webgl.bindFramebuffer(webgl.FRAMEBUFFER, fbo.fbo);
-                        createCubeMatrix(canvas, webgl, fprogram, time, uM);
+                        createCubeMatrix(canvas, webgl, fprogram, time, x, y);
                         initBuffer(webgl, fprogram, vertex, "a_Position", 3, false);
                         initBuffer(webgl, fprogram, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
-                        const u_idLocation = webgl.getUniformLocation(fprogram, "u_id");
-                        webgl.uniform4fv(u_idLocation, uid); 
+                        // const u_idLocation = webgl.getUniformLocation(fprogram, "u_id");
+                        // webgl.uniform4fv(u_idLocation, uid); 
                     
                         webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0)
                     }
                 },
-                drawColorBuffer: (time:number) => {
+                drawColorBuffer: (time:number, x: number, y:number) => {
                     webgl.bindFramebuffer(webgl.FRAMEBUFFER, null);
                     webgl.useProgram(program);
-                    createCubeMatrix(canvas, webgl, program, time, uM)
+                    createCubeMatrix(canvas, webgl, program, time, x, y)
                     initBuffer(webgl, program, color, "a_Color", 3, false);
                     initBuffer(webgl, program, vertex, "a_Position", 3, false);
                     initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
@@ -131,32 +123,30 @@ export function makeCube (canvas: HTMLCanvasElement, webgl: WebGL2RenderingConte
 
 
 
-function createCubeMatrix(canvas: HTMLCanvasElement, webgl: WebGL2RenderingContext, program: WebGLProgram, time: number, fM: mat4 ) {
+function createCubeMatrix(canvas: HTMLCanvasElement, webgl: WebGL2RenderingContext, program: WebGLProgram, time: number, x: number, y: number ) {
     
-    const uM = mat4.create();
-    mat4.identity(uM);
-    mat4.perspective(uM, glMatrix.toRadian(30), 1, 1, 100);
+    const vM = mat4.create();
+    mat4.identity(vM);
+    mat4.perspective(vM, glMatrix.toRadian(30), canvas.width / canvas.height, 1, 100);
+
 
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, [w.x, w.y, w.z], [0, 0, 0], [0, 1, 0]);
+    mat4.lookAt(lM, [3, 1, 1.5], [0, 0, 0], [0, 1, 0]);
 
-    mat4.mul(uM, uM, lM);
+    mat4.mul(vM, vM, lM);
     
-    // const rM = mat4.create();
-    // mat4.identity(rM);
-    let r = rotation(0, 45);
-    // mat4.rotate(rM, rM, glMatrix.toRadian(r), [0, 1, 0]);
-    mat4.fromRotation(uM, glMatrix.toRadian(r), [0, 1, 0]);
-    // mat4.fromTranslation(uM, [0, .35, 0]);
-    // mat4.scale(rM, rM, [.1, .1, .1]);
-    // mat4.translate(rM, rM, [0, .35, 0]);
+    const rM = mat4.create();
+    mat4.identity(rM);
 
+    // mat4.rotateX(rM, rM, glMatrix.toRadian(0));
+    mat4.rotateY(rM, rM, glMatrix.toRadian(y));
+    mat4.translate(rM, rM, [0, 0.1, 0]);
 
-    // mat4.mul(uM, uM, lM);
+    mat4.mul(vM, vM, rM);
 
     const u_MatrixLocation = webgl.getUniformLocation(program, "u_Matrix");
-    webgl.uniformMatrix4fv(u_MatrixLocation, false, uM);
+    webgl.uniformMatrix4fv(u_MatrixLocation, false, vM);
 }
 
 export function makeSphere(canvas: HTMLCanvasElement, webgl: WebGL2RenderingContext) {

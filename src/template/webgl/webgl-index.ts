@@ -1,5 +1,6 @@
-import { initEvent, translateToWebglColor, resizeCanvasToDisplaySize } from "../../common/base";
+import { InitDraggingAction, translateToWebglColor, resizeCanvasToDisplaySize } from "../../common/base";
 import { createPane } from "../../common/scene";
+import { makeCube } from "../../common/creator";
 const w:any = window;
 const PLANESIZE = 5;
 
@@ -12,16 +13,19 @@ export function main(id: string) {
     webgl.enable(webgl.DEPTH_TEST);
     webgl.enable(webgl.POLYGON_OFFSET_FILL);
     webgl.enable(webgl.CULL_FACE);
-    const drawPane = createPane(canvas, webgl, PLANESIZE,  500 / 1600, null);
-   
-    var tick = (time:number) => {
-        webgl.viewport(0, 0, canvas.width, canvas.height);
+    const drawPane = createPane(canvas, webgl, PLANESIZE, null);
+    const { drawColorBuffer: drawCube } = makeCube(canvas, webgl);
+    var tick = (time:number, x:number, y: number) => {
         resizeCanvasToDisplaySize(canvas);
+        webgl.viewport(0, 0, webgl.canvas.width, webgl.canvas.height);
         webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-        drawPane(time);
-        window.requestAnimationFrame(tick);
+        drawPane(time, x, y);
+        drawCube(time, x, y);
+        // window.requestAnimationFrame(tick);
     }
-    window.requestAnimationFrame(tick);
+    tick(0, 0, 0);
+    InitDraggingAction(canvas, tick);
+    // window.requestAnimationFrame(tick);
 }
 
 

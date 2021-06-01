@@ -18,8 +18,8 @@ const CanvasArea: React.FC<Props> = ({id, main, children}) => {
 
     return <div className="new-scence">
             <header>
-                <p>title: CHEN YAN'S WEBGL LAB CHAPHTER 0: TEMPLATE</p>
-                <p>here input your description for the chapter.</p>
+                <p className="title">title: CHEN YAN'S WEBGL LAB CHAPHTER 0: TEMPLATE</p>
+                <p className="desc">here input your description for the chapter.</p>
             </header>
             <canvas id={id}></canvas>
             <div className="control-area">

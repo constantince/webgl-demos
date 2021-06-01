@@ -6,12 +6,19 @@ html, body, #app {
     width: 100%;
 }
 body {
+    .container {
+        padding: 10px 20px;
+    }
+    p {
+        margin: 0;
+        padding: 0;
+    }
     position: relative;
     .footer-desc {
-        color: #795548;
+        color: #032b75;
         font-size: 12px;
         position: absolute;
-        bottom: 0;
-        padding: 15px;
+        bottom: 10px;
+        right: 10px;
     }
 }

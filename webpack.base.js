@@ -27,6 +27,7 @@ const setMPA = () => {
     });
     
     return {
+        // entry: {template: "/src/template/index.ts"},
         entry,
         plugins
     }

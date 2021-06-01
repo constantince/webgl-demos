@@ -55,42 +55,46 @@ function createVertex (square:number) {
     };
 }
 
-const w:any = window;
-
-function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, program: WebGLProgram, time: number, paneSize:number) {
+function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, program: WebGLProgram, time: number, paneSize:number, x: number, y: number) {
     const vM = mat4.create();
     mat4.identity(vM);
     mat4.perspective(vM, glMatrix.toRadian(30), canvas.width / canvas.height, 1, 100);
 
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, [w.x, w.y, w.z], [0, 0, 0], [0, 1, 0]);
+    mat4.lookAt(lM, [3, 1, 1.5], [0, 0, 0], [0, 1, 0]);
 
     mat4.mul(vM, vM, lM);
 
     const rM = mat4.create();
     mat4.identity(rM);
-    mat4.translate(rM, rM, [-paneSize / 2, 0.0, paneSize / 2]);
-    mat4.mul(vM, vM, rM);
 
+    // mat4.rotateX(rM, rM, glMatrix.toRadian(0));
+    mat4.rotateY(rM, rM, glMatrix.toRadian(y));
+    // mat4.rotateZ(rM, rM, glMatrix.toRadian(0));
+
+    mat4.translate(rM, rM, [-paneSize / 2, 0.0, paneSize / 2]);
+
+    mat4.mul(vM, vM, rM);
+   
     const u_MatrixLocation = webgl.getUniformLocation(program, "u_Matrix");
     webgl.uniformMatrix4fv(u_MatrixLocation, false, vM);
 }
 
 // create Floor 0.1 * 0.1 per 1 squat
-export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingContext, paneSize: number, ratio: number, paneColor: string | null) => {
+export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingContext, paneSize: number, paneColor: string | null) => {
     const program = initShader(webgl, vertexShader, fragmentShader);
     if( program ) {
         const {vertexArray, count, pointerArray, pointerLineArray, lineCount} = createVertex(paneSize);
         // console.log(vertexArray, pointerArray, pointerLineArray);
        
         
-       return (time: number = 1) => {
+       return (time: number = 1, x:number, y:number) => {
             time *= 0.001;
             webgl.useProgram(program);
 
             initBuffer(webgl, program, vertexArray, "a_Position", 3, false);
-            createMatrix(canvas, webgl, program, time, paneSize);
+            createMatrix(canvas, webgl, program, time, paneSize, x, y);
             // draw lines.
             webgl.polygonOffset(1.0, 1.0);
             const f_Line = webgl.getUniformLocation(program, "f_Line");
