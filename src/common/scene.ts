@@ -1,4 +1,4 @@
-import { glMatrix, mat4 } from "gl-matrix";
+import { glMatrix, mat4, vec3 } from "gl-matrix";
 import { initBuffer, initShader, translateToWebglColor } from "./base";
 
 const vertexShader = `#version 300 es
@@ -55,14 +55,14 @@ function createVertex (square:number) {
     };
 }
 
-function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, program: WebGLProgram, time: number, paneSize:number, x: number, y: number) {
+function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, program: WebGLProgram, paneSize:number, camera: vec3) {
     const vM = mat4.create();
     mat4.identity(vM);
     mat4.perspective(vM, glMatrix.toRadian(30), canvas.width / canvas.height, 1, 100);
 
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, [3, 1, 1.5], [0, 0, 0], [0, 1, 0]);
+    mat4.lookAt(lM, camera, [0, 0, 0], [0, 1, 0]);
 
     mat4.mul(vM, vM, lM);
 
@@ -70,7 +70,7 @@ function createMatrix(canvas: HTMLCanvasElement,webgl: WebGL2RenderingContext, p
     mat4.identity(rM);
 
     // mat4.rotateX(rM, rM, glMatrix.toRadian(0));
-    mat4.rotateY(rM, rM, glMatrix.toRadian(y));
+    // mat4.rotateY(rM, rM, glMatrix.toRadian(y));
     // mat4.rotateZ(rM, rM, glMatrix.toRadian(0));
 
     mat4.translate(rM, rM, [-paneSize / 2, 0.0, paneSize / 2]);
@@ -89,19 +89,18 @@ export const createPane =(canvas: HTMLCanvasElement ,webgl: WebGL2RenderingConte
         // console.log(vertexArray, pointerArray, pointerLineArray);
        
         
-       return (time: number = 1, x:number, y:number) => {
-            time *= 0.001;
+       return (camera: vec3) => {
             webgl.useProgram(program);
 
             initBuffer(webgl, program, vertexArray, "a_Position", 3, false);
-            createMatrix(canvas, webgl, program, time, paneSize, x, y);
+            createMatrix(canvas, webgl, program, paneSize, camera);
             // draw lines.
             webgl.polygonOffset(1.0, 1.0);
             const f_Line = webgl.getUniformLocation(program, "f_Line");
             webgl.uniform1i(f_Line, 1);
             initBuffer(webgl, program, pointerLineArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);
             webgl.drawElements(webgl.LINES, lineCount, webgl.UNSIGNED_SHORT, 0);
-    
+            
             // draw triangles.
             if( paneColor ) {
                 initBuffer(webgl, program, pointerArray, null, null, webgl.ELEMENT_ARRAY_BUFFER);

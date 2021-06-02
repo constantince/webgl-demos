@@ -1,6 +1,6 @@
-import { glMatrix, mat4 } from "gl-matrix";
+import { glMatrix, mat4, vec3 } from "gl-matrix";
 import { createFrameBuffer, initBuffer, initShader, rotation, translateToWebglColor } from "./base";
-import { createCubeMesh, SphereMesh } from "./primative";
+import { createCubeMesh, SphereMesh, calculateVertexSphere } from "./primative";
 const desc = [null, "cube", "sphere"];
 export const vertexShader = `#version 300 es
     in vec4 a_Position;
