@@ -1,25 +1,36 @@
-import { glMatrix, mat4, vec3 } from "gl-matrix";
+import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 import { createFrameBuffer, initBuffer, initShader} from "./base";
 import { createCubeMesh, SphereMesh, calculateVertexSphere } from "./primative";
 export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
+    in vec2 a_TexCoord;
     uniform mat4 u_Matrix;
 
+    out vec2 v_TexCoord;
     out vec4 v_Color;
     void main() {
         gl_Position = u_Matrix * a_Position;
         v_Color = a_Color;
+        v_TexCoord = a_TexCoord;
     }
 `;
 
 export const fragmentShader = `#version 300 es
     precision mediump float;
     in vec4 v_Color;
+    in vec2 v_TexCoord;
     out vec4 FragColor;
     uniform bool f_Line;
+    uniform bool u_hasTexture;
+    uniform sampler2D u_Sampler;
     void main() {
-        FragColor = v_Color;
+        if (u_hasTexture) {
+            FragColor = texture(u_Sampler, v_TexCoord);
+        } else {
+            FragColor = v_Color;
+        }
+       
     }
 `;
 
@@ -64,18 +75,11 @@ type ObjectClassItem = {
     // craete Light
     lightUp: (lightColor: number[], lightPosition: number[], ambient: number[]) => void,
     // create texture for webgl 
-    createTexture: (image: HTMLImageElement) => WebGLTexture;
+    createTexture: (image: HTMLImageElement) => void;
     // create frame buffer
     createFrameBuffer: () => void;
     // init vertex
 
-}
-
-type Props = {
-    radius: number,
-    resolution: number,
-    fragmentShader: string,
-    vertexShader: string,
 }
 
 // create object stuffs with Objects class
@@ -88,11 +92,9 @@ type Props = {
     .rotate([0,0,0]);
 
     cube.setMatrix(vM).draw().bufferDraw();
-
-
 */
 
-
+const V3 = vec3.fromValues(0, 0, 0);
 export class Objects implements ObjectClassItem {
     matrixFromOutside = false;
     matrix = mat4.create();
@@ -106,23 +108,23 @@ export class Objects implements ObjectClassItem {
     vertexShader = vertexShader;
     gl: WebGL2RenderingContext;
     textureImage = "";
+    texture: WebGLTexture | null;
     program: WebGLProgram;
     worldMatrix = mat4.create();
-    _position : vec3;
-    _lookAt : vec3[];
+    _position = V3;
+    _lookAt = [V3, V3, V3];
+    _scale = vec3.fromValues(1, 1, 1);
 
 
     constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, type: string) {
         // this.primatives = this.calculateVertexSphere();
-        const V3 = vec3.fromValues(0, 0, 0);
+        this.texture = null;
         this.type = type;
         this.gl = gl;
         this.canvas = canvas;
         this.program = <WebGLProgram>this.createShader();
         this.primatives = this.pickPrimative();
         this.primativeData = [];
-        this._position = vec3.fromValues(0, 0, 0);
-        this._lookAt = [V3, V3, V3];
         gl.useProgram(this.program);
         this.init();
         this.matrixLocation = gl.getUniformLocation(this.program, "u_Matrix") as WebGLUniformLocation;
@@ -143,13 +145,21 @@ export class Objects implements ObjectClassItem {
     }
 
     scale = (v: vec3) => {
-        const rm = mat4.create();
-        mat4.identity(rm);
-        mat4.fromScaling(this.worldMatrix, v)
+       this._scale = v;
+       return this;
     }
 
     rotate = (v: vec3) => {
         
+    }
+
+    coverImg = (src: string) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => {
+            this.createTexture(img);
+        }
+        return this;
     }
 
     // to choose white prive is 
@@ -191,12 +201,12 @@ export class Objects implements ObjectClassItem {
             //     type: this.gl.ARRAY_BUFFER,
             //     data: this.primatives.normal
             // },
-            // {
-            //     name: "a_texCoord",
-            //     size: 2,
-            //     type: this.gl.ARRAY_BUFFER,
-            //     data: this.primatives.texcoord
-            // },
+            {
+                name: "a_TexCoord",
+                size: 2,
+                type: false,
+                data: this.primatives.texcoord
+            },
             {
                 name: null,
                 size: null,
@@ -210,29 +220,15 @@ export class Objects implements ObjectClassItem {
 
     draw = (matrix: mat4 | void) => {
         this.gl.useProgram(this.program);
-        // let currentmatrix;
-        // this.createBuffer(this.primativeData);
-
-        // if(!this.matrix) {
-        //     this.matrix = this.createMatrix();
-        // }
-        // if(this.matrixFromOutside) {
-        //     currentmatrix = this.resetProjectionAndViewMatrix();
-        // } else {
-        //     this.createMatrix();
-        // }
-       
-        // if( matrix ) {
-        //     mat4.mul(this.worldMatrix, this.worldMatrix, matrix);
-        // }
 
         this.createMatrix(matrix);
         
-       
-       
-        // init
-       
         this.createBuffer(this.primativeData);
+
+        // if( this.texture ) {
+        //     this.gl.activeTexture(this.gl.TEXTURE0);
+        //     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        // }
       
         this.gl.drawElements(this.gl.TRIANGLES, this.primatives.count, this.gl.UNSIGNED_SHORT, 0);
     }
@@ -271,7 +267,17 @@ export class Objects implements ObjectClassItem {
         mat4.lookAt(lM, this._lookAt[0], this._lookAt[1], this._lookAt[2]);
     
         
-        mat4.mul(lM, lM, mat4.fromTranslation(mat4.create(), this._position));
+        mat4.mul(
+            lM, 
+            lM, 
+            mat4.fromRotationTranslationScaleOrigin(
+                mat4.create(),
+                quat.create(), 
+                this._position, 
+                this._scale,
+                 [0,0,0]
+            )
+        );
 
         mat4.mul(vM, vM, lM);
 
@@ -300,21 +306,34 @@ export class Objects implements ObjectClassItem {
     };
 
 
-    createTexture = (image: HTMLImageElement): WebGLTexture => {
+    createTexture = (image: HTMLImageElement) => {
         const gl = this.gl,
-            u_Sampler = gl.getUniformLocation(this.program, "u_sampler");
+            u_Sampler = gl.getUniformLocation(this.program, "u_Sampler");
 
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
         const texture = gl.createTexture();
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, texture);
 
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+
+        gl.generateMipmap(gl.TEXTURE_2D);
 
         gl.uniform1i(u_Sampler, 0);
+        const u_hasTexture = this.gl.getUniformLocation(this.program, "u_hasTexture");
+        this.gl.uniform1i(u_hasTexture, 1);
 
-        return texture as WebGLTexture;
+        this.texture = texture;
+        // return texture as WebGLTexture;
     };
 
     createFrameBuffer = () => {

@@ -3,6 +3,7 @@ import { createPane } from "../../common/scene";
 import { makeCube } from "../../common/creator";
 import { Objects, ViewerIntheSameScene } from "../../common/factory";
 import { glMatrix, mat4, vec3 } from "gl-matrix";
+import onePunchMan from "../../images/one-punch-man.png";
 const w:any = window;
 const PLANESIZE = 5;
 
@@ -39,18 +40,18 @@ export function main(id: string) {
 
     
     const drawPane = createPane(canvas, webgl, PLANESIZE, null);
-    const cube = new Objects(webgl, canvas, 'cube').position([0, 0.1, 0])
-    const cube2 = new Objects(webgl, canvas, 'cube').position([1, 0.1, 0]);
-    const cube3 = new Objects(webgl, canvas, 'cube').position([1, 0.1, 1]);
+    const cube = new Objects(webgl, canvas, 'cube').position([0, 0.1, 0]).scale([0.1, 0.1, 0.1]).coverImg(onePunchMan);
+    // const cube2 = new Objects(webgl, canvas, 'cube').position([1, 0.1, 0]);
+    // const cube3 = new Objects(webgl, canvas, 'cube').position([1, 0.1, 1]);
     const viewer = new ViewerIntheSameScene(createMatrix(canvas));
-    viewer.add([cube, cube2, cube3]).lookAt([3, 1, 1.5], [0, 0, 0], [0, 1, 0]);;
+    viewer.add([cube]).lookAt([3, 1, 1.5], [0, 0, 0], [0, 1, 0]);;
     
     var tick = (time:number) => {
         time *= 0.001;
         const u_CameraPositionValue = vec3.fromValues(Math.cos(time * .1) * 2, 1, Math.sin(time * .1) * 2);
         // const rotateMatrix = mat4.create();
         // mat4.identity(rotateMatrix);
-        // mat4.rotateY(rotateMatrix, rotateMatrix, glMatrix.toRadian(y));
+        // mat4.rotateX(rotateMatrix, rotateMatrix, glMatrix.toRadian(time * 0.11));
         resizeCanvasToDisplaySize(canvas);
         webgl.viewport(0, 0, webgl.canvas.width, webgl.canvas.height);
         webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
@@ -63,7 +64,10 @@ export function main(id: string) {
         // drawCube(time, x, y);
         window.requestAnimationFrame(tick);
     }
-    window.requestAnimationFrame(tick);
+    // setTimeout(() => {
+        window.requestAnimationFrame(tick);
+    // }, 3000)
+    
     // InitDraggingAction(canvas, tick);
     // window.requestAnimationFrame(tick);
 }
