@@ -56,7 +56,7 @@ export const fragmentShader = `#version 300 es
         vec3 ambient = u_AmbientColor;
 
         vec3 normal = normalize(vec3(v_Normal));
-        vec3 lightDirection = normalize(u_LightPosition) - normalize(v_WorldPosition).xyz;
+        vec3 lightDirection = normalize(u_LightPosition - v_WorldPosition.xyz);
         float fDot = max(dot(lightDirection, normal), 0.0);
         vec3 diffuse = u_LightColor * fDot;
 
@@ -65,8 +65,8 @@ export const fragmentShader = `#version 300 es
         //     FragColor = texture(u_Sampler, v_TexCoord);
         // } else {
 
-        vec3 color = (diffuse + ambient) * v_Color.rgb 
-        FragColor = vec3(color, 1.0);
+        vec3 color = (diffuse + ambient) * v_Color.rgb;
+        FragColor = vec4(color, 1.0);
         // }
 
        
@@ -247,12 +247,12 @@ export class Objects implements ObjectClassItem {
                 type: false,
                 data: this.primatives.color
             },
-            // {
-            //     name: "a_Normal",
-            //     size: 2,
-            //     type: this.gl.ARRAY_BUFFER,
-            //     data: this.primatives.normal
-            // },
+            {
+                name: "a_Normal",
+                size: 3,
+                type: false,
+                data: this.primatives.normal
+            },
             {
                 name: "a_TexCoord",
                 size: 2,
@@ -333,6 +333,7 @@ export class Objects implements ObjectClassItem {
     
         const wM = mat4.create();
         mat4.identity(wM);
+
         mat4.mul(
             wM, 
             wM, 
@@ -345,20 +346,23 @@ export class Objects implements ObjectClassItem {
             )
         );
 
-      
-
-        
         if( mat ) {
             mat4.mul(wM, wM, mat);
         }
+
+        const nM = mat4.create();
+        mat4.identity(nM);
+        mat4.invert(nM, wM);
        
         // this.matrix = vM;
         const u_ProjectionMatrix = this.gl.getUniformLocation(this.program, "u_ProjectionMatrix");
         const u_ViewMatrix = this.gl.getUniformLocation(this.program, "u_ViewMatrix");
         const u_WorldMatrix = this.gl.getUniformLocation(this.program, "u_WorldMatrix");
+        const u_NormalMatrix = this.gl.getUniformLocation(this.program, "u_NormalMatrix");
         this.gl.uniformMatrix4fv(u_ProjectionMatrix, false, vM);
         this.gl.uniformMatrix4fv(u_ViewMatrix, false, lM);
         this.gl.uniformMatrix4fv(u_WorldMatrix, false, wM);
+        this.gl.uniformMatrix4fv(u_NormalMatrix, false, nM);
 
     }
 
