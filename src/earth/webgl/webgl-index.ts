@@ -19,8 +19,8 @@ export const main = (id: string) => {
     const program = initShader(webgl, VERTEX_SHADER, FRAGMENT_SHADER);
     if( program ) {
         webgl.useProgram(program);
-        const {vertexs, pointer, len, normal, texcoord}  = calculateVertexSphere();
-        initBuffer(webgl, program, vertexs, "a_Position", 3, false);
+        const {vertex, pointer, count, normal, texcoord}  = calculateVertexSphere();
+        initBuffer(webgl, program, vertex, "a_Position", 3, false);
         initBuffer(webgl, program, normal, "a_Normal", 3, false);
         initBuffer(webgl, program, texcoord, "a_TexCoord", 2, false);
         initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
@@ -31,7 +31,7 @@ export const main = (id: string) => {
             createLight(webgl, program, [win.POSITIONX, win.POSITIONY, win.POSITIONZ]);
             createWorldMatrix(webgl, program, angle);
             webgl.clear(webgl.COLOR_BUFFER_BIT |  webgl.DEPTH_BUFFER_BIT);
-            webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
+            webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);
             requestAnimationFrame(tick);
             
         }

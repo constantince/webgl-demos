@@ -1,9 +1,9 @@
 //计算出立方体的各个点的位置
 export type VertexObjectsBuffer = {
-	vertexs: Float32Array;
+	vertex: Float32Array;
 	color: Float32Array;
 	pointer: Uint16Array;
-	len: number;
+	count: number;
 };
 
 type NormalAndTexCoord = {
@@ -440,7 +440,7 @@ export function calculatePoints(): VertexObjectsBuffer & {normals: Float32Array}
 		23, // back
 	]);
 
-	return {vertexs, color, pointer, normals, len: pointer.length};
+	return {vertex: vertexs, color, pointer, normals, count: pointer.length};
 }
 
 // create sphere
@@ -453,7 +453,8 @@ export function calculateVertexSphere(
 	let vertexs: number[] = [],
 		pointer: number[] = [],
 		normal: number[] = [],
-		textures: number[] = [];
+		textures: number[] = [],
+		colors: number[] = [];
 	for (let index = 0; index <= RESOLUTION; index++) {
 		// 同等高度的Y值
 		const y = Math.cos(theta * index);
@@ -467,13 +468,10 @@ export function calculateVertexSphere(
 
 			var u = 1 - index1 / RESOLUTION;
 			var v = 1 - index / RESOLUTION;
-			vertexs.push(x * RADIUS);
-			vertexs.push(y * RADIUS);
-			vertexs.push(z * RADIUS);
-			normal.push(x), normal.push(y);
-			normal.push(z);
-			textures.push(u);
-			textures.push(v);
+			vertexs.push(x * RADIUS, y * RADIUS, z * RADIUS);
+			colors.push(1.0, 1.0, 1.0);
+			normal.push(x, y, z);
+			textures.push(u, v);
 		}
 	}
 
@@ -498,10 +496,10 @@ export function calculateVertexSphere(
 		// linePointer.push(index + RESOLUTION + 1);
 	}
 	return {
-		vertexs: new Float32Array(vertexs),
+		vertex: new Float32Array(vertexs),
 		pointer: new Uint16Array(pointer),
-		color: new Float32Array([]),
-		len: pointer.length,
+		color: new Float32Array(colors),
+		count: pointer.length,
 		normal: new Float32Array(normal),
 		texcoord: new Float32Array(textures),
 	};

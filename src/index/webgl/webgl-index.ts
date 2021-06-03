@@ -40,16 +40,16 @@ export const main = (id: string): void => {
         }
         webgl.useProgram(program);
 
-        const {vertexs, pointer, len, color } = VOB.CubeVertex();
+        const {vertex, pointer, count, color } = VOB.CubeVertex();
 
-        initBuffer(webgl, program, vertexs, "a_Position", 3, false);
+        initBuffer(webgl, program, vertex, "a_Position", 3, false);
         initBuffer(webgl, program, color, "a_Color", 3, false);
         initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
 
         const tick = () => {
             useMatrix(webgl, program, rotation(0, 45));
             webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-            webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
+            webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);
             
             requestAnimationFrame(tick)
         }

@@ -5,14 +5,24 @@ export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
     in vec2 a_TexCoord;
-    uniform mat4 u_Matrix;
+    in vec4 a_Normal;
+
+
+    uniform mat4 u_ProjectionMatrix;
+    uniform mat4 u_ViewMatrix;
+    uniform mat4 u_WorldMatrix;
+    uniform mat4 u_NormalMatrix;
 
     out vec2 v_TexCoord;
     out vec4 v_Color;
+    out vec4 v_Normal;
+    out vec4 v_WorldPosition;
     void main() {
-        gl_Position = u_Matrix * a_Position;
+        gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_WorldMatrix * a_Position;
         v_Color = a_Color;
         v_TexCoord = a_TexCoord;
+        v_WorldPosition = u_WorldMatrix * a_Position;
+        v_Normal = u_NormalMatrix * a_Normal;
     }
 `;
 
@@ -20,16 +30,55 @@ export const fragmentShader = `#version 300 es
     precision mediump float;
     in vec4 v_Color;
     in vec2 v_TexCoord;
-    out vec4 FragColor;
+    in vec4 v_Normal;
+    in vec4 v_WorldPosition;
+
+   
+    uniform sampler2D u_Sampler;
+
+    
     uniform bool f_Line;
     uniform bool u_hasTexture;
-    uniform sampler2D u_Sampler;
+    uniform bool u_hasLight;    
+
+    uniform vec3 u_LightPosition;
+    uniform vec3 u_LightColor;
+    uniform vec3 u_AmbientColor;
+
+
+    out vec4 FragColor;
     void main() {
-        if (u_hasTexture) {
-            FragColor = texture(u_Sampler, v_TexCoord);
-        } else {
-            FragColor = v_Color;
-        }
+
+        // // a·d·s light start
+        // //vec3 light = vec3(0.0);
+
+
+        vec3 ambient = u_AmbientColor;
+
+        vec3 normal = normalize(vec3(v_Normal));
+        vec3 lightDirection = normalize(u_LightPosition) - normalize(v_WorldPosition).xyz;
+        float fDot = max(dot(lightDirection, normal), 0.0);
+        vec3 diffuse = u_LightColor * fDot;
+
+
+        // if (u_hasTexture == true) {
+        //     FragColor = texture(u_Sampler, v_TexCoord);
+        // } else {
+
+        vec3 color = (diffuse + ambient) * v_Color.rgb 
+        FragColor = vec3(color, 1.0);
+        // }
+
+       
+
+
+
+
+
+
+
+
+        
        
     }
 `;
@@ -54,7 +103,7 @@ type ObjectClassItem = {
     canvas: HTMLCanvasElement,
     gl: WebGL2RenderingContext,
     type: string,
-    matrixLocation: WebGLUniformLocation,
+    // matrixLocation: WebGLUniformLocation,
     worldMatrix: mat4,
     program: WebGLProgram, // webgl program
     textureImage: string, // the texture path
@@ -73,7 +122,7 @@ type ObjectClassItem = {
     // init matrix 
     createMatrix: (mat: mat4) => void
     // craete Light
-    lightUp: (lightColor: number[], lightPosition: number[], ambient: number[]) => void,
+    lightUp: (lightColor: vec3, lightPosition: vec3, ambient: vec3) => void,
     // create texture for webgl 
     createTexture: (image: HTMLImageElement) => void;
     // create frame buffer
@@ -102,13 +151,13 @@ export class Objects implements ObjectClassItem {
     canvas: HTMLCanvasElement;
     type: string;
     primatives: VertexObjectsBuffer;
-    matrixLocation: WebGLUniformLocation;
+    // matrixLocation: WebGLUniformLocation;
     createPre: any;
     fragmentShader = fragmentShader;
     vertexShader = vertexShader;
     gl: WebGL2RenderingContext;
     textureImage = "";
-    texture: WebGLTexture | null;
+    texture: WebGLTexture | null | "loading";
     program: WebGLProgram;
     worldMatrix = mat4.create();
     _position = V3;
@@ -127,7 +176,7 @@ export class Objects implements ObjectClassItem {
         this.primativeData = [];
         gl.useProgram(this.program);
         this.init();
-        this.matrixLocation = gl.getUniformLocation(this.program, "u_Matrix") as WebGLUniformLocation;
+        // this.matrixLocation = gl.getUniformLocation(this.program, "u_Matrix") as WebGLUniformLocation;
         // this.matrix = this.createMatrix();
         
         
@@ -156,6 +205,7 @@ export class Objects implements ObjectClassItem {
     coverImg = (src: string) => {
         const img = new Image();
         img.src = src;
+        this.texture = "loading";
         img.onload = () => {
             this.createTexture(img);
         }
@@ -167,7 +217,8 @@ export class Objects implements ObjectClassItem {
         switch(this.type) {
             case "cube":
                 return createCubeMesh();
-            break;
+            case "sphere":
+                return calculateVertexSphere();
 
             default:
                 return createCubeMesh();
@@ -177,7 +228,8 @@ export class Objects implements ObjectClassItem {
     init = () => {
         
         // this.createMatrix();
-
+        const u_hasTexture = this.gl.getUniformLocation(this.program, "u_hasTexture");
+        this.gl.uniform1i(u_hasTexture, 0);
         this.buildBufferData(); 
     };
 
@@ -219,17 +271,29 @@ export class Objects implements ObjectClassItem {
     }
 
     draw = (matrix: mat4 | void) => {
+        // texture images is loading. 
+        if(this.texture === "loading") {
+            return;
+        }
+
+        // tab the program
         this.gl.useProgram(this.program);
 
+        // update matrix 
         this.createMatrix(matrix);
         
+        // update buffer data
         this.createBuffer(this.primativeData);
 
-        // if( this.texture ) {
-        //     this.gl.activeTexture(this.gl.TEXTURE0);
-        //     this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-        // }
-      
+       
+
+        // texutre images loading done. active and bind texture.
+        if( this.texture ) {
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+        }
+        
+        // draw object.
         this.gl.drawElements(this.gl.TRIANGLES, this.primatives.count, this.gl.UNSIGNED_SHORT, 0);
     }
 
@@ -262,38 +326,44 @@ export class Objects implements ObjectClassItem {
         mat4.identity(vM);
         mat4.perspective(vM, glMatrix.toRadian(30), this.canvas.width / this.canvas.height, 1, 1000);
 
+
         const lM = mat4.create();
         mat4.identity(lM);
         mat4.lookAt(lM, this._lookAt[0], this._lookAt[1], this._lookAt[2]);
     
-        
+        const wM = mat4.create();
+        mat4.identity(wM);
         mat4.mul(
-            lM, 
-            lM, 
+            wM, 
+            wM, 
             mat4.fromRotationTranslationScaleOrigin(
                 mat4.create(),
                 quat.create(), 
                 this._position, 
                 this._scale,
-                 [0,0,0]
+                [0,0,0]
             )
         );
 
-        mat4.mul(vM, vM, lM);
+      
 
         
         if( mat ) {
-            mat4.mul(vM, vM, mat);
+            mat4.mul(wM, wM, mat);
         }
        
         // this.matrix = vM;
-        const u_MatrixLocation = this.gl.getUniformLocation(this.program, "u_Matrix");
-        this.gl.uniformMatrix4fv(u_MatrixLocation, false, vM);
+        const u_ProjectionMatrix = this.gl.getUniformLocation(this.program, "u_ProjectionMatrix");
+        const u_ViewMatrix = this.gl.getUniformLocation(this.program, "u_ViewMatrix");
+        const u_WorldMatrix = this.gl.getUniformLocation(this.program, "u_WorldMatrix");
+        this.gl.uniformMatrix4fv(u_ProjectionMatrix, false, vM);
+        this.gl.uniformMatrix4fv(u_ViewMatrix, false, lM);
+        this.gl.uniformMatrix4fv(u_WorldMatrix, false, wM);
 
     }
 
     // light up target
-    lightUp = (lightColor: number[], lightPosition: number[], ambient: number[]): this => {
+    lightUp = (lightColor: vec3, lightPosition: vec3, ambient: vec3): this => {
         const gl = this.gl, program = this.program;
         const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
         const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
@@ -307,8 +377,9 @@ export class Objects implements ObjectClassItem {
 
 
     createTexture = (image: HTMLImageElement) => {
-        const gl = this.gl,
-            u_Sampler = gl.getUniformLocation(this.program, "u_Sampler");
+        const gl = this.gl;
+        this.gl.useProgram(this.program);
+        const u_Sampler = gl.getUniformLocation(this.program, "u_Sampler");
 
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
         const texture = gl.createTexture();
@@ -356,6 +427,13 @@ export class ViewerIntheSameScene {
     lookAt(eyes:vec3, source: vec3, up: vec3) {
         this.stuffs.forEach(element => {
             element.lookAt(eyes, source, up);
+        });
+        return this;
+    }
+
+    lightUp(lightColor: vec3, lightPosition: vec3, ambient: vec3) {
+        this.stuffs.forEach(element => {
+            element.lightUp(lightColor, lightPosition, ambient);
         });
         return this;
     }

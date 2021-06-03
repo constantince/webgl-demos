@@ -3,7 +3,8 @@ import { createPane } from "../../common/scene";
 import { makeCube } from "../../common/creator";
 import { Objects, ViewerIntheSameScene } from "../../common/factory";
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import onePunchMan from "../../images/one-punch-man.png";
+import onePunchMan from "../../images/webgl.png";
+import cloudOnSky from "../../images/sky_cloud.jpg";
 const w:any = window;
 const PLANESIZE = 5;
 
@@ -17,13 +18,6 @@ function createMatrix(canvas: HTMLCanvasElement) {
     mat4.lookAt(lM, [3, 1, 1.5], [0, 0, 0], [0, 1, 0]);
 
     mat4.mul(vM, vM, lM);
-
-    // const rM = mat4.create();
-    // mat4.identity(rM);
-
-    // mat4.rotateY(rM, rM, glMatrix.toRadian(y));
-
-    // mat4.mul(vM, vM, rM);
 
     return vM;
 }
@@ -40,11 +34,20 @@ export function main(id: string) {
 
     
     const drawPane = createPane(canvas, webgl, PLANESIZE, null);
-    const cube = new Objects(webgl, canvas, 'cube').position([0, 0.1, 0]).scale([0.1, 0.1, 0.1]).coverImg(onePunchMan);
-    // const cube2 = new Objects(webgl, canvas, 'cube').position([1, 0.1, 0]);
-    // const cube3 = new Objects(webgl, canvas, 'cube').position([1, 0.1, 1]);
+    const webglBox = new Objects(webgl, canvas, 'cube')
+    .position([0, 0.1, 0])
+    .scale([0.1, 0.1, 0.1]);
+    // .coverImg(onePunchMan);
+    // const cloud = new Objects(webgl, canvas, 'cube')
+    // .position([1, 0.1, 0])
+    // .scale([0.1, 0.1, 0.1]);
+
+    // const sphere = new Objects(webgl, canvas, "sphere")
+    // .position([1, 0.1, 1])
+    // .scale([0.1, 0.1, 0.1]);
+
     const viewer = new ViewerIntheSameScene(createMatrix(canvas));
-    viewer.add([cube]).lookAt([3, 1, 1.5], [0, 0, 0], [0, 1, 0]);;
+    viewer.add([webglBox]).lookAt([3, 1, 1.5], [0, 0, 0], [0, 1, 0]);;
     
     var tick = (time:number) => {
         time *= 0.001;

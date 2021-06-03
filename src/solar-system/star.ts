@@ -3,12 +3,12 @@ import { calculateVertexSphere } from "../common/primative";
 import {mat4, glMatrix} from "gl-matrix";
 
 type VertexObjectsBuffer = {
-    vertexs: Float32Array,
+    vertex: Float32Array,
     color: Float32Array,
     pointer: Uint16Array,
     normal: Float32Array,
     texcoord: Float32Array
-    len: number
+    count: number
 }
 
 type BufferData = {
@@ -91,7 +91,7 @@ export default class Star implements StartItem {
                 name: "a_Position",
                 size: 3,
                 type: this.gl.ARRAY_BUFFER,
-                data: this.primatives.vertexs
+                data: this.primatives.vertex
             },
             {
                 name: "a_Color",
@@ -125,7 +125,7 @@ export default class Star implements StartItem {
 
         this.gl.useProgram(this.program);
         this.matrix = this.createMatrix("v_PositonMatrix");
-        this.gl.drawElements(this.gl.TRIANGLES, this.primatives.len, type, 0);
+        this.gl.drawElements(this.gl.TRIANGLES, this.primatives.count, type, 0);
     }
 
     createShader = () => {

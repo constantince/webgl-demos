@@ -72,12 +72,12 @@ function createRectangle(webgl: W2RC, program: WebGLProgram, angle: number): voi
 function createCube(webgl: W2RC, program: WebGLProgram, angle: number): void {
     if(!program) return console.error("program do not exist");
     webgl.useProgram(program);
-    const { vertexs, color, pointer, len } = calculatePoints();
-    initBuffer(webgl, program, vertexs, "a_Position", 3, false);
+    const { vertex, color, pointer, count } = calculatePoints();
+    initBuffer(webgl, program, vertex, "a_Position", 3, false);
     initBuffer(webgl, program, color, "a_Color", 3, false);
     initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
     initMatrix(webgl, program, angle);
-    webgl.drawElements(webgl.TRIANGLES, len, webgl.UNSIGNED_SHORT, 0);
+    webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);
 }
 
 // init the cube's matrix
