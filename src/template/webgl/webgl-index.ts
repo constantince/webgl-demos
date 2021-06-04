@@ -37,11 +37,12 @@ export function main(id: string) {
     const webglBox = new Objects(webgl, canvas, 'sphere')
     .position([0, 0.1, 0])
     .scale([0.1, 0.1, 0.1])
-    .lightUp([1.0, 1.0, 1.0], [-3.0, 5, 1.5], [0.2, 0.2, 0.2]);
+    .lightUp([1.0, 1.0, 1.0], [ 5.0, 8.0, 7.0], [0.2, 0.2, 0.2]);
     // .coverImg(onePunchMan);
     // const cloud = new Objects(webgl, canvas, 'cube')
     // .position([1, 0.1, 0])
-    // .scale([0.1, 0.1, 0.1]);
+    // .scale([0.1, 0.1, 0.1])
+    // .lightUp([1.0, 1.0, 1.0], [-3.0, 1, 1.5], [0.2, 0.2, 0.2]);
 
     // const sphere = new Objects(webgl, canvas, "sphere")
     // .position([1, 0.1, 1])

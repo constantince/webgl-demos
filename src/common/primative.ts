@@ -505,6 +505,61 @@ export function calculateVertexSphere(
 	};
 }
 
+export function test() { // Create a sphere
+	var SPHERE_DIV = 13;
+  
+	var i, ai, si, ci;
+	var j, aj, sj, cj;
+	var p1, p2;
+  
+	var positions = [];
+	var indices = [];
+	var colors = [];
+  
+	// Generate coordinates
+	for (j = 0; j <= SPHERE_DIV; j++) {
+	  aj = j * Math.PI / SPHERE_DIV;
+	  sj = Math.sin(aj);
+	  cj = Math.cos(aj);
+	  for (i = 0; i <= SPHERE_DIV; i++) {
+		ai = i * 2 * Math.PI / SPHERE_DIV;
+		si = Math.sin(ai);
+		ci = Math.cos(ai);
+  
+		positions.push(si * sj);  // X
+		positions.push(cj);       // Y
+		positions.push(ci * sj);  // Z
+
+		colors.push(1.0, 1.0, 1.0);
+	  }
+	}
+  
+	// Generate indices
+	for (j = 0; j < SPHERE_DIV; j++) {
+	  for (i = 0; i < SPHERE_DIV; i++) {
+		p1 = j * (SPHERE_DIV+1) + i;
+		p2 = p1 + (SPHERE_DIV+1);
+  
+		indices.push(p1);
+		indices.push(p2);
+		indices.push(p1 + 1);
+  
+		indices.push(p1 + 1);
+		indices.push(p2);
+		indices.push(p2 + 1);
+	  }
+	}
+  
+	return {
+		vertex: new Float32Array(positions),
+		pointer: new Uint16Array(indices),
+		color: new Float32Array(colors),
+		count: indices.length,
+		normal: new Float32Array(positions),
+		texcoord: new Float32Array([]),
+	};
+  }
+
 // create cylinder
 //计算出圆柱体以及表面线条的各个点的位置
 export function calculateCylinder_bak(height: number, radiusB: number, radiusT: number, empty: boolean) {
