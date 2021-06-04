@@ -21,7 +21,7 @@ export const vertexShader = `#version 300 es
         gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_WorldMatrix * a_Position;
         v_Color = a_Color;
         v_TexCoord = a_TexCoord;
-        v_WorldPosition = u_WorldMatrix * a_Position;
+        v_WorldPosition = u_ViewMatrix * u_WorldMatrix * a_Position;
         v_Normal = u_NormalMatrix * a_Normal;
     }
 `;
