@@ -133,12 +133,12 @@ export function createCubeMesh():Demention3 {
 	]);
 
 	const color = new Float32Array([
-		0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  0.4, 0.4, 1.0,  // v0-v1-v2-v3 front(blue)
-		0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  0.4, 1.0, 0.4,  // v0-v3-v4-v5 right(green)
-		1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  1.0, 0.4, 0.4,  // v0-v5-v6-v1 up(red)
-		1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  1.0, 1.0, 0.4,  // v1-v6-v7-v2 left
-		1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  1.0, 1.0, 1.0,  // v7-v4-v3-v2 down
-		0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0,  0.4, 1.0, 1.0   // v4-v7-v6-v5 back
+		1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  // v0-v1-v2-v3 front(blue)
+		1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  // v0-v3-v4-v5 right(green)
+		1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  // v0-v5-v6-v1 up(red)
+		1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  // v1-v6-v7-v2 left
+		1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  // v7-v4-v3-v2 down
+		1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0,  1.0, 0.0, 0.0   // v4-v7-v6-v5 back
 	]);
 
 	const normal = new Float32Array([
@@ -504,6 +504,69 @@ export function calculateVertexSphere(
 		texcoord: new Float32Array(textures),
 	};
 }
+
+export function test() { // Create a sphere
+	  var SPHERE_DIV = 60;
+	  var i, ai, si, ci;
+	  var j, aj, sj, cj;
+	  var p1, p2;
+	  var vertices = [],indices = [], colors = [];
+	  for (j = 0; j <= SPHERE_DIV; j++) 
+	  {
+		aj = j * Math.PI / SPHERE_DIV;
+		sj = Math.sin(aj);
+		cj = Math.cos(aj);
+		for (i = 0; i <= SPHERE_DIV; i++) 
+		{
+		  ai = i * 2 * Math.PI / SPHERE_DIV;
+		  si = Math.sin(ai);
+		  ci = Math.cos(ai);
+		  vertices.push(si * sj);  // X
+		  vertices.push(cj);       // Y
+		  vertices.push(ci * sj);  // Z
+		  colors.push(1.0, 0.0, 0.0);
+		}
+	  } // <------------------------------------------------------------- ADD 
+	
+	  for (j = 0; j < SPHERE_DIV; j++)
+	  {
+		for (i = 0; i < SPHERE_DIV; i++)
+		{
+		  p1 = j * (SPHERE_DIV+1) + i;
+		  p2 = p1 + (SPHERE_DIV+1);
+		  indices.push(p1);
+		  indices.push(p2);
+		  indices.push(p1 + 1);
+		  indices.push(p1 + 1);
+		  indices.push(p2);
+		  indices.push(p2 + 1);
+		}
+	  }
+	//   var vertexBuffer = gl.createBuffer();
+	//   if (!vertexBuffer) 
+	//   {
+	// 	console.log('Failed to create the buffer object');
+	// 	return -1;
+	//   }
+	//   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer); 
+	//   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW); 
+	//   var indexBuffer = gl.createBuffer(); 
+	//   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer); 
+	//   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+	
+	  // } <------------------------------------------------------ REMOVE
+	
+
+  
+	return {
+		vertex: new Float32Array(vertices),
+		pointer: new Uint16Array(indices),
+		color: new Float32Array(colors),
+		count: indices.length,
+		normal: new Float32Array(vertices),
+		texcoord: new Float32Array([]),
+	};
+  }
 
 // create cylinder
 //计算出圆柱体以及表面线条的各个点的位置

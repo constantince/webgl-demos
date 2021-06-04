@@ -1,6 +1,6 @@
 import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 import { createFrameBuffer, initBuffer, initShader} from "./base";
-import { createCubeMesh, SphereMesh, calculateVertexSphere } from "./primative";
+import { createCubeMesh, SphereMesh, calculateVertexSphere, test } from "./primative";
 export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
@@ -15,14 +15,14 @@ export const vertexShader = `#version 300 es
 
     out vec2 v_TexCoord;
     out vec4 v_Color;
-    out vec4 v_Normal;
+    out vec3 v_Normal;
     out vec4 v_WorldPosition;
     void main() {
         gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_WorldMatrix * a_Position;
         v_Color = a_Color;
         v_TexCoord = a_TexCoord;
-        v_WorldPosition = u_ViewMatrix * u_WorldMatrix * a_Position;
-        v_Normal = u_NormalMatrix * a_Normal;
+        v_WorldPosition = u_WorldMatrix * a_Position;
+        v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));
     }
 `;
 
@@ -30,7 +30,7 @@ export const fragmentShader = `#version 300 es
     precision mediump float;
     in vec4 v_Color;
     in vec2 v_TexCoord;
-    in vec4 v_Normal;
+    in vec3 v_Normal;
     in vec4 v_WorldPosition;
 
    
@@ -53,20 +53,23 @@ export const fragmentShader = `#version 300 es
         // //vec3 light = vec3(0.0);
 
 
-        vec3 ambient = u_AmbientColor;
+        // vec3 ambient = u_AmbientColor;
 
-        vec3 normal = normalize(vec3(v_Normal));
+        vec3 normal = normalize(v_Normal);
         vec3 lightDirection = normalize(u_LightPosition - v_WorldPosition.xyz);
         float fDot = max(dot(lightDirection, normal), 0.0);
-        vec3 diffuse = u_LightColor * fDot;
+        // vec3 diffuse = u_LightColor * fDot;
 
+
+            vec3 diffuse = u_LightColor * v_Color.rgb * fDot;
+            vec3 ambient = u_AmbientColor * v_Color.rgb;
 
         // if (u_hasTexture == true) {
         //     FragColor = texture(u_Sampler, v_TexCoord);
         // } else {
 
-        vec3 color = (diffuse + ambient) * v_Color.rgb;
-        FragColor = vec4(color, 1.0);
+        // vec3 color = (diffuse + ambient) * v_Color.rgb;
+        FragColor = vec4(diffuse + ambient, v_Color.a);
         // }
 
        
@@ -218,7 +221,7 @@ export class Objects implements ObjectClassItem {
             case "cube":
                 return createCubeMesh();
             case "sphere":
-                return calculateVertexSphere();
+                return test();
 
             default:
                 return createCubeMesh();
@@ -253,12 +256,12 @@ export class Objects implements ObjectClassItem {
                 type: false,
                 data: this.primatives.normal
             },
-            {
-                name: "a_TexCoord",
-                size: 2,
-                type: false,
-                data: this.primatives.texcoord
-            },
+            // {
+            //     name: "a_TexCoord",
+            //     size: 2,
+            //     type: false,
+            //     data: this.primatives.texcoord
+            // },
             {
                 name: null,
                 size: null,
@@ -352,7 +355,8 @@ export class Objects implements ObjectClassItem {
 
         const nM = mat4.create();
         mat4.identity(nM);
-        mat4.invert(nM, wM);
+        // mat4.invert(nM, lM);
+        // mat4.transpose(nM, nM);
        
         // this.matrix = vM;
         const u_ProjectionMatrix = this.gl.getUniformLocation(this.program, "u_ProjectionMatrix");
@@ -372,9 +376,9 @@ export class Objects implements ObjectClassItem {
         const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
         const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
         const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
-        gl.uniform3fv(u_LightColor, lightColor);
-        gl.uniform3fv(u_LightPosition, lightPosition);
-        gl.uniform3fv(u_AmbientColor, ambient);
+        gl.uniform3f(u_LightColor, 0.8, 0.8, 0.8);
+        gl.uniform3f(u_LightPosition, 5.0, 5.0, 5.0);
+        gl.uniform3f(u_AmbientColor, 0.2, 0.2, 0.2);
         return this;
         
     };
