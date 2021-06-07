@@ -3,7 +3,7 @@ import { createPane } from "../../common/scene";
 import { makeCube } from "../../common/creator";
 import { Objects, ViewerIntheSameScene } from "../../common/factory";
 import { glMatrix, mat4, vec3 } from "gl-matrix";
-import onePunchMan from "../../images/webgl.png";
+import webglImage from "../../images/webgl.png";
 import cloudOnSky from "../../images/sky_cloud.jpg";
 const w:any = window;
 const PLANESIZE = 5;
@@ -35,21 +35,22 @@ export function main(id: string) {
     
     const drawPane = createPane(canvas, webgl, PLANESIZE, null);
     const webglBox = new Objects(webgl, canvas, 'sphere')
-    .position([0, 0.2, 0])
+    .position([0, 0.1, 0])
     .scale([0.1, 0.1, 0.1])
-    .lightUp([1.0, 1.0, 1.0], [ 5.0, 8.0, 7.0], [0.2, 0.2, 0.2]);
-    // .coverImg(onePunchMan);
-    // const cloud = new Objects(webgl, canvas, 'cube')
-    // .position([1, 0.1, 0])
-    // .scale([0.1, 0.1, 0.1])
-    // .lightUp([1.0, 1.0, 1.0], [-3.0, 1, 1.5], [0.2, 0.2, 0.2]);
+    .coverImg(webglImage);
+
+    const cloud = new Objects(webgl, canvas, 'cube')
+    .position([1, 0.1, 0])
+    .scale([0.1, 0.1, 0.1]);
 
     // const sphere = new Objects(webgl, canvas, "sphere")
     // .position([1, 0.1, 1])
     // .scale([0.1, 0.1, 0.1]);
 
     const viewer = new ViewerIntheSameScene(createMatrix(canvas));
-    viewer.add([webglBox]).lookAt([3, 1, 1.5], [0, 0, 0], [0, 1, 0]);;
+    viewer.add([webglBox, cloud])
+    .lookAt([3, 1, 1.5], [0, 0, 0], [0, 1, 0])
+    .lightUp([0.8, 0.8, 0.8], [0, 1.0, 0], [0.2, 0.2, 0.2], [-2.0, 2.0, 1.0]);
     
     var tick = (time:number) => {
         time *= 0.001;

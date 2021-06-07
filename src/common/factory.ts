@@ -44,11 +44,12 @@ export const fragmentShader = `#version 300 es
     uniform vec3 u_LightPosition;
     uniform vec3 u_LightColor;
     uniform vec3 u_AmbientColor;
-
+    uniform vec3 u_EyesPosition;
 
     out vec4 FragColor;
+    const float shininess = 64.0;
     void main() {
-
+        vec4 baseColor = v_Color;
         // // a·d·s light start
         // //vec3 light = vec3(0.0);
 
@@ -57,19 +58,30 @@ export const fragmentShader = `#version 300 es
 
         vec3 normal = normalize(v_Normal);
         vec3 lightDirection = normalize(u_LightPosition - v_WorldPosition.xyz);
+        vec3 eyesToSurface = normalize(u_EyesPosition - v_WorldPosition.xyz);
+        vec3 halfVector = normalize(eyesToSurface + lightDirection);
+
+        float specular = 0.0;
         float fDot = max(dot(lightDirection, normal), 0.0);
-        // vec3 diffuse = u_LightColor * fDot;
+        // 背面不进行光亮处理
+        if( fDot > 0.0) {
+            specular = pow(dot(halfVector, normal), shininess);
+        }
 
+        if (u_hasTexture == true) {
+            baseColor = texture(u_Sampler, v_TexCoord);
+        }
 
-            vec3 diffuse = u_LightColor * v_Color.rgb * fDot;
-            vec3 ambient = u_AmbientColor * v_Color.rgb;
+       
 
-        // if (u_hasTexture == true) {
-        //     FragColor = texture(u_Sampler, v_TexCoord);
+        vec3 diffuse = u_LightColor * baseColor.rgb * fDot;
+        vec3 ambient = u_AmbientColor * baseColor.rgb;
+
+        
         // } else {
-
-        // vec3 color = (diffuse + ambient) * v_Color.rgb;
-        FragColor = vec4(diffuse + ambient, v_Color.a);
+        // 反射光线无需混合基底颜色调制
+        // vec3 color = (diffuse + ambient) * baseColor.rgb;
+        FragColor = vec4(diffuse + ambient + specular, baseColor.a);
         // }
 
        
@@ -125,7 +137,7 @@ type ObjectClassItem = {
     // init matrix 
     createMatrix: (mat: mat4) => void
     // craete Light
-    lightUp: (lightColor: vec3, lightPosition: vec3, ambient: vec3) => void,
+    lightUp: (lightColor: vec3, lightPosition: vec3, ambient: vec3, eyes: vec3) => void,
     // create texture for webgl 
     createTexture: (image: HTMLImageElement) => void;
     // create frame buffer
@@ -231,8 +243,8 @@ export class Objects implements ObjectClassItem {
     init = () => {
         
         // this.createMatrix();
-        const u_hasTexture = this.gl.getUniformLocation(this.program, "u_hasTexture");
-        this.gl.uniform1i(u_hasTexture, 0);
+        // const u_hasTexture = this.gl.getUniformLocation(this.program, "u_hasTexture");
+        // this.gl.uniform1i(u_hasTexture, 0);
         this.buildBufferData(); 
     };
 
@@ -355,8 +367,8 @@ export class Objects implements ObjectClassItem {
 
         const nM = mat4.create();
         mat4.identity(nM);
-        // mat4.invert(nM, lM);
-        // mat4.transpose(nM, nM);
+        mat4.invert(nM, lM);
+        mat4.transpose(nM, nM);
        
         // this.matrix = vM;
         const u_ProjectionMatrix = this.gl.getUniformLocation(this.program, "u_ProjectionMatrix");
@@ -371,14 +383,17 @@ export class Objects implements ObjectClassItem {
     }
 
     // light up target
-    lightUp = (lightColor: vec3, lightPosition: vec3, ambient: vec3): this => {
+    lightUp = (lightColor: vec3, lightPosition: vec3, ambient: vec3, eyes: vec3): this => {
         const gl = this.gl, program = this.program;
+        gl.useProgram(program);
         const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
         const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
         const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
-        gl.uniform3f(u_LightColor, 0.8, 0.8, 0.8);
-        gl.uniform3f(u_LightPosition, 5.0, 5.0, 5.0);
-        gl.uniform3f(u_AmbientColor, 0.2, 0.2, 0.2);
+        const u_EyesPosition = gl.getUniformLocation(program, "u_EyesPosition");
+        gl.uniform3fv(u_LightColor, lightColor);
+        gl.uniform3fv(u_LightPosition, lightPosition);
+        gl.uniform3fv(u_AmbientColor, ambient);
+        gl.uniform3fv(u_EyesPosition, eyes);
         return this;
         
     };
@@ -439,9 +454,9 @@ export class ViewerIntheSameScene {
         return this;
     }
 
-    lightUp(lightColor: vec3, lightPosition: vec3, ambient: vec3) {
+    lightUp(lightColor: vec3, lightPosition: vec3, ambient: vec3, eyes: vec3) {
         this.stuffs.forEach(element => {
-            element.lightUp(lightColor, lightPosition, ambient);
+            element.lightUp(lightColor, lightPosition, ambient, eyes);
         });
         return this;
     }
