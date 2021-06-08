@@ -50,12 +50,7 @@ export const fragmentShader = `#version 300 es
     const float shininess = 64.0;
     void main() {
         vec4 baseColor = v_Color;
-        // // a·d·s light start
-        // //vec3 light = vec3(0.0);
-
-
-        // vec3 ambient = u_AmbientColor;
-
+        // a·d·s light start
         vec3 normal = normalize(v_Normal);
         vec3 lightDirection = normalize(u_LightPosition - v_WorldPosition.xyz);
         vec3 eyesToSurface = normalize(u_EyesPosition - v_WorldPosition.xyz);
@@ -63,8 +58,8 @@ export const fragmentShader = `#version 300 es
 
         float specular = 0.0;
         float fDot = max(dot(lightDirection, normal), 0.0);
-        // 背面不进行光亮处理
-        if( fDot > 0.0) {
+        
+        if( fDot > 0.0) { // 背面不进行光亮处理
             specular = pow(dot(halfVector, normal), shininess);
         }
 
@@ -72,17 +67,10 @@ export const fragmentShader = `#version 300 es
             baseColor = texture(u_Sampler, v_TexCoord);
         }
 
-       
-
         vec3 diffuse = u_LightColor * baseColor.rgb * fDot;
         vec3 ambient = u_AmbientColor * baseColor.rgb;
-
+        FragColor = vec4(diffuse + ambient + specular, baseColor.a);  // 反射光线无需混合基底颜色调制
         
-        // } else {
-        // 反射光线无需混合基底颜色调制
-        // vec3 color = (diffuse + ambient) * baseColor.rgb;
-        FragColor = vec4(diffuse + ambient + specular, baseColor.a);
-        // }
 
        
 
@@ -233,7 +221,7 @@ export class Objects implements ObjectClassItem {
             case "cube":
                 return createCubeMesh();
             case "sphere":
-                return test();
+                return calculateVertexSphere();
 
             default:
                 return createCubeMesh();
@@ -268,12 +256,12 @@ export class Objects implements ObjectClassItem {
                 type: false,
                 data: this.primatives.normal
             },
-            // {
-            //     name: "a_TexCoord",
-            //     size: 2,
-            //     type: false,
-            //     data: this.primatives.texcoord
-            // },
+            {
+                name: "a_TexCoord",
+                size: 2,
+                type: false,
+                data: this.primatives.texcoord
+            },
             {
                 name: null,
                 size: null,

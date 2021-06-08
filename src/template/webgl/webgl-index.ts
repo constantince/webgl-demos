@@ -37,11 +37,13 @@ export function main(id: string) {
     const webglBox = new Objects(webgl, canvas, 'sphere')
     .position([0, 0.1, 0])
     .scale([0.1, 0.1, 0.1])
-    .coverImg(webglImage);
+    .coverImg(cloudOnSky);
+    
 
     const cloud = new Objects(webgl, canvas, 'cube')
     .position([1, 0.1, 0])
-    .scale([0.1, 0.1, 0.1]);
+    .scale([0.1, 0.1, 0.1])
+    .coverImg(webglImage);
 
     // const sphere = new Objects(webgl, canvas, "sphere")
     // .position([1, 0.1, 1])
@@ -68,11 +70,11 @@ export function main(id: string) {
         // cube.draw();
         // cube2.draw();
         // drawCube(time, x, y);
-        window.requestAnimationFrame(tick);
+        // window.requestAnimationFrame(tick);
     }
-    // setTimeout(() => {
+    setTimeout(() => {
         window.requestAnimationFrame(tick);
-    // }, 3000)
+    }, 3000)
     
     // InitDraggingAction(canvas, tick);
     // window.requestAnimationFrame(tick);
