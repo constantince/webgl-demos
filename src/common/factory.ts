@@ -38,18 +38,19 @@ export const fragmentShader = `#version 300 es
 
     
     uniform bool f_Line;
-    uniform bool u_hasTexture;
-    uniform bool u_hasLight;    
+    
+    uniform bool u_HasLight;    
 
     uniform vec3 u_LightPosition;
     uniform vec3 u_LightColor;
     uniform vec3 u_AmbientColor;
     uniform vec3 u_EyesPosition;
+    uniform bool u_HasTexture;
 
     out vec4 FragColor;
-    const float shininess = 64.0;
+    const float shininess = 120.0;
     void main() {
-        vec4 baseColor = v_Color;
+        
         // a·d·s light start
         vec3 normal = normalize(v_Normal);
         vec3 lightDirection = normalize(u_LightPosition - v_WorldPosition.xyz);
@@ -60,29 +61,28 @@ export const fragmentShader = `#version 300 es
         float fDot = max(dot(lightDirection, normal), 0.0);
         
         if( fDot > 0.0) { // 背面不进行光亮处理
-            specular = pow(dot(halfVector, normal), shininess);
+            vec3 reflectVec = reflect(-lightDirection, normal);
+            specular = pow(dot(reflectVec, eyesToSurface), shininess);
         }
 
-        if (u_hasTexture == true) {
-            baseColor = texture(u_Sampler, v_TexCoord);
+        vec4 baseColor = vec4(1.0, 1.0, 1.0, 1.0);
+
+        if ( u_HasTexture ) {
+            vec4 baseColor = texture(u_Sampler, v_TexCoord);    
+        } else {
+            baseColor = v_Color;
         }
 
+        
         vec3 diffuse = u_LightColor * baseColor.rgb * fDot;
         vec3 ambient = u_AmbientColor * baseColor.rgb;
-        FragColor = vec4(diffuse + ambient + specular, baseColor.a);  // 反射光线无需混合基底颜色调制
-        
-
-       
-
-
-
-
-
-
-
-
         
        
+        if( u_HasLight ) {
+            FragColor = vec4(diffuse + ambient + specular, baseColor.a);  // 反射光线无需混合基底颜色调制
+        } else {
+            FragColor = baseColor;
+        }
     }
 `;
 
@@ -164,8 +164,9 @@ export class Objects implements ObjectClassItem {
     program: WebGLProgram;
     worldMatrix = mat4.create();
     _position = V3;
-    _lookAt = [V3, V3, V3];
+    _lookAt = [vec3.fromValues(1, 1, 1), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
     _scale = vec3.fromValues(1, 1, 1);
+    _rotate = [glMatrix.toRadian(60), 0, 0, 0]
 
 
     constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, type: string) {
@@ -201,8 +202,9 @@ export class Objects implements ObjectClassItem {
        return this;
     }
 
-    rotate = (v: vec3) => {
-        
+    rotate = (v: number[]) => {
+        this._rotate = v;
+        return this;
     }
 
     coverImg = (src: string) => {
@@ -231,7 +233,7 @@ export class Objects implements ObjectClassItem {
     init = () => {
         
         // this.createMatrix();
-        // const u_hasTexture = this.gl.getUniformLocation(this.program, "u_hasTexture");
+        // const u_hasTexture = this.gl.getUniformLocation(this.program, "u_HasTexture");
         // this.gl.uniform1i(u_hasTexture, 0);
         this.buildBufferData(); 
     };
@@ -337,12 +339,18 @@ export class Objects implements ObjectClassItem {
         const wM = mat4.create();
         mat4.identity(wM);
 
+       
+        var i=0;
         mat4.mul(
             wM, 
             wM, 
             mat4.fromRotationTranslationScaleOrigin(
                 mat4.create(),
-                quat.create(), 
+                mat4.fromRotation(mat4.create(), glMatrix.toRadian(
+                    this._rotate[i++]
+                    ), 
+                    [this._rotate[i++], this._rotate[i++], this._rotate[i++]
+                ]), 
                 this._position, 
                 this._scale,
                 [0,0,0]
@@ -355,7 +363,7 @@ export class Objects implements ObjectClassItem {
 
         const nM = mat4.create();
         mat4.identity(nM);
-        mat4.invert(nM, lM);
+        mat4.invert(nM, mat4.mul(mat4.create(), lM, wM));
         mat4.transpose(nM, nM);
        
         // this.matrix = vM;
@@ -374,6 +382,7 @@ export class Objects implements ObjectClassItem {
     lightUp = (lightColor: vec3, lightPosition: vec3, ambient: vec3, eyes: vec3): this => {
         const gl = this.gl, program = this.program;
         gl.useProgram(program);
+        const u_LightUp = gl.getUniformLocation(program, "u_HasLight");
         const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
         const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
         const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
@@ -382,6 +391,7 @@ export class Objects implements ObjectClassItem {
         gl.uniform3fv(u_LightPosition, lightPosition);
         gl.uniform3fv(u_AmbientColor, ambient);
         gl.uniform3fv(u_EyesPosition, eyes);
+        gl.uniform1i(u_LightUp, 1);
         return this;
         
     };
@@ -411,8 +421,8 @@ export class Objects implements ObjectClassItem {
         gl.generateMipmap(gl.TEXTURE_2D);
 
         gl.uniform1i(u_Sampler, 0);
-        const u_hasTexture = this.gl.getUniformLocation(this.program, "u_hasTexture");
-        this.gl.uniform1i(u_hasTexture, 1);
+        const u_HasTexture = this.gl.getUniformLocation(this.program, "u_HasTexture");
+        this.gl.uniform1i(u_HasTexture, 1);
 
         this.texture = texture;
         // return texture as WebGLTexture;
