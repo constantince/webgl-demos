@@ -308,4 +308,16 @@ export function resizeCanvasToDisplaySize(canvas:HTMLCanvasElement) {
 }
 
 
+export function preparation(gl: WebGL2RenderingContext) {
+	gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.CULL_FACE);
+	gl.clearColor(.1, .1, .1 , 1);
+}
+
+export function clearCanvas(gl: WebGL2RenderingContext) {
+	resizeCanvasToDisplaySize(<HTMLCanvasElement>gl.canvas);
+	gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+}
+
 
