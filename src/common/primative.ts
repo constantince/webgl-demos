@@ -99,6 +99,35 @@ export function createStarMesh(): Demention2 {
 	};
 }
 
+export function createOrbitMesh(resolution: number = 50, radius: number = 1): Demention3 {
+
+	//将夹角转换成弧度
+	const radiation = (Math.PI / 180) * (360 / resolution);
+		//中心位置
+	let vertexs: number[] = [];
+	let color: number[] = [];
+	let pointer: number[] = [];
+	for (let index = 0; index < resolution; index++) {
+		let x = Math.sin(radiation * index) * radius;
+		let y = Math.cos(radiation * index) * radius;
+		vertexs.push(x);
+		vertexs.push(0);
+		vertexs.push(y);
+		pointer.push(index);
+		pointer.push((index + 1) % resolution);
+		color.push(1.0, 1.0, 1.0);
+	}
+
+	return {
+		vertex: new Float32Array(vertexs),
+		count: pointer.length,
+		color: new Float32Array(color),
+		pointer: new Uint16Array(pointer),
+		texcoord: new Float32Array([]),
+		normal: new Float32Array([])
+	}
+}
+
 // create circle
 export function createCircleMesh(resolution: number, radius: number): Demention2 {
 	//将夹角转换成弧度

@@ -1,6 +1,6 @@
 import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 import { createFrameBuffer, initBuffer, initShader} from "./base";
-import { createCubeMesh, SphereMesh, calculateVertexSphere, test } from "./primative";
+import { createCubeMesh, SphereMesh, calculateVertexSphere, test, createOrbitMesh } from "./primative";
 export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
@@ -67,7 +67,7 @@ export const fragmentShader = `#version 300 es
 
         vec4 baseColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-        if ( u_HasTexture ) {
+        if ( false ) {
             vec4 baseColor = texture(u_Sampler, v_TexCoord);    
         } else {
             baseColor = v_Color;
@@ -164,16 +164,20 @@ export class Objects implements ObjectClassItem {
     program: WebGLProgram;
     worldMatrix = mat4.create();
     _position = V3;
-    _lookAt = [vec3.fromValues(1, 1, 1), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
+    children: Objects[] = [];
+    parent: Objects | null = null;
+    _lookAt = [vec3.fromValues(0, .2, 10), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
     _scale = vec3.fromValues(1, 1, 1);
-    _rotate = [glMatrix.toRadian(60), 0, 0, 0]
+    _rotate = [glMatrix.toRadian(0), 0, 1, 0];
+    drawType:number;
 
 
-    constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, type: string) {
+    constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, type: string, drawType?: number) {
         // this.primatives = this.calculateVertexSphere();
         this.texture = null;
         this.type = type;
         this.gl = gl;
+        this.drawType = drawType || gl.TRIANGLES
         this.canvas = canvas;
         this.program = <WebGLProgram>this.createShader();
         this.primatives = this.pickPrimative();
@@ -185,6 +189,29 @@ export class Objects implements ObjectClassItem {
         
         
         
+    }
+
+    addParent = (parent: Objects) => {
+        if( this.parent ) {
+            const idx = this.parent.children.indexOf(this);
+            if( idx >= 0) {
+                this.parent.children.splice(idx, 1);
+            }
+        } else {
+            parent.children.push(this);
+        }
+        this.parent = parent;
+
+        return this;
+    }
+
+    updateMatrix =() => {
+        // this.createMatrix(matrix);
+        if( this.children ) {
+            this.children.forEach(child => {
+                child.draw(this.worldMatrix);
+            });
+        }
     }
 
     lookAt = (eyes: vec3, source: vec3, up: vec3) => {
@@ -224,6 +251,8 @@ export class Objects implements ObjectClassItem {
                 return createCubeMesh();
             case "sphere":
                 return calculateVertexSphere();
+            case "orbit":
+                return createOrbitMesh();
 
             default:
                 return createCubeMesh();
@@ -233,8 +262,8 @@ export class Objects implements ObjectClassItem {
     init = () => {
         
         // this.createMatrix();
-        // const u_hasTexture = this.gl.getUniformLocation(this.program, "u_HasTexture");
-        // this.gl.uniform1i(u_hasTexture, 0);
+        const u_hasTexture = this.gl.getUniformLocation(this.program, "u_HasTexture");
+        this.gl.uniform1i(u_hasTexture, 0);
         this.buildBufferData(); 
     };
 
@@ -285,6 +314,7 @@ export class Objects implements ObjectClassItem {
         this.gl.useProgram(this.program);
 
         // update matrix 
+        // this.updateMatrix(matrix);
         this.createMatrix(matrix);
         
         // update buffer data
@@ -299,18 +329,21 @@ export class Objects implements ObjectClassItem {
         }
         
         // draw object.
-        this.gl.drawElements(this.gl.TRIANGLES, this.primatives.count, this.gl.UNSIGNED_SHORT, 0);
+        this.gl.drawElements(this.drawType, this.primatives.count, this.gl.UNSIGNED_SHORT, 0);
+
+
+        this.updateMatrix();
+
     }
 
     createShader = () => {
         return initShader(this.gl, this.vertexShader, this.fragmentShader);
     }
 
-  
-
     createBuffer = (data: BufferData[]) => {
         for (let index = 0; index < data.length; index++) {
             const element = data[index];
+            if ( element.data.length === 0) continue;
             initBuffer(this.gl, this.program, element.data, element.name, element.size, element.type);
         }
     }
@@ -335,28 +368,37 @@ export class Objects implements ObjectClassItem {
         const lM = mat4.create();
         mat4.identity(lM);
         mat4.lookAt(lM, this._lookAt[0], this._lookAt[1], this._lookAt[2]);
-    
+        var i=0;
         const wM = mat4.create();
         mat4.identity(wM);
 
+        mat4.scale(wM, wM, this._scale);
+
+        mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]])
        
-        var i=0;
+        mat4.translate(wM, wM, this._position);
+       
+
+        
+        /*
         mat4.mul(
             wM, 
             wM, 
             mat4.fromRotationTranslationScaleOrigin(
                 mat4.create(),
-                mat4.fromRotation(mat4.create(), glMatrix.toRadian(
-                    this._rotate[i++]
-                    ), 
-                    [this._rotate[i++], this._rotate[i++], this._rotate[i++]
-                ]), 
+                mat4.fromRotation(
+                    mat4.create(),
+                    glMatrix.toRadian(this._rotate[i++]), 
+                    [
+                        this._rotate[i++], this._rotate[i++], this._rotate[i++]
+                    ]
+                ), 
                 this._position, 
                 this._scale,
-                [0,0,0]
+                [0, 0, 0]
             )
         );
-
+*/
         if( mat ) {
             mat4.mul(wM, wM, mat);
         }
@@ -375,6 +417,8 @@ export class Objects implements ObjectClassItem {
         this.gl.uniformMatrix4fv(u_ViewMatrix, false, lM);
         this.gl.uniformMatrix4fv(u_WorldMatrix, false, wM);
         this.gl.uniformMatrix4fv(u_NormalMatrix, false, nM);
+
+        this.worldMatrix = wM;
 
     }
 
