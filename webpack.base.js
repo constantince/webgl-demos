@@ -25,10 +25,12 @@ const setMPA = () => {
             }
         })
     });
-    
+    console.log(entry);
     return {
-        // entry: {template: "/src/template/index.ts"},
-        entry,
+        entry: {
+            "solar-system": "./src/solar-system/index.tsx"
+        },
+        // entry,
         plugins
     }
 }

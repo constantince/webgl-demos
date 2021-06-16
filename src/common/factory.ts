@@ -163,6 +163,10 @@ export class Objects implements ObjectClassItem {
     texture: WebGLTexture | null | "loading";
     program: WebGLProgram;
     worldMatrix = mat4.create();
+    lM = mat4.create();
+    nM = mat4.create();
+    vM = mat4.create();
+    wM = mat4.create();
     _position = V3;
     children: Objects[] = [];
     parent: Objects | null = null;
@@ -170,6 +174,7 @@ export class Objects implements ObjectClassItem {
     _scale = vec3.fromValues(1, 1, 1);
     _rotate = [glMatrix.toRadian(0), 0, 1, 0];
     drawType:number;
+    matrixCreated:boolean = false;
 
 
     constructor(gl: WebGL2RenderingContext, canvas: HTMLCanvasElement, type: string, drawType?: number) {
@@ -205,11 +210,11 @@ export class Objects implements ObjectClassItem {
         return this;
     }
 
-    updateMatrix =() => {
-        // this.createMatrix(matrix);
+    transverse =() => {
         if( this.children ) {
             this.children.forEach(child => {
-                child.draw(this.worldMatrix);
+                // update children's matrix with own world matrix;
+                child.draw(this.wM, true);
             });
         }
     }
@@ -304,7 +309,7 @@ export class Objects implements ObjectClassItem {
         return location;
     }
 
-    draw = (matrix: mat4 | void) => {
+    draw = (matrix: mat4 | void, update: boolean = false) => {
         // texture images is loading. 
         if(this.texture === "loading") {
             return;
@@ -314,13 +319,14 @@ export class Objects implements ObjectClassItem {
         this.gl.useProgram(this.program);
 
         // update matrix 
-        // this.updateMatrix(matrix);
-        this.createMatrix(matrix);
+        if( update && this.matrixCreated === true) {
+            this.updateMatrix(matrix);
+        } else {
+            this.createMatrix(matrix);
+        }
         
         // update buffer data
         this.createBuffer(this.primativeData);
-
-       
 
         // texutre images loading done. active and bind texture.
         if( this.texture ) {
@@ -332,7 +338,7 @@ export class Objects implements ObjectClassItem {
         this.gl.drawElements(this.drawType, this.primatives.count, this.gl.UNSIGNED_SHORT, 0);
 
 
-        this.updateMatrix();
+        this.transverse();
 
     }
 
@@ -357,69 +363,90 @@ export class Objects implements ObjectClassItem {
         return mat;
     }
 
+    // update matrix
+    updateMatrix = (mat: mat4 | void) => {
+        var i = 0;
+        const wM = mat4.create();
+        mat4.identity(wM);
+
+        // if (mat) { 
+        //     mat4.mul(wM, wM, mat);
+        // }
+
+        mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat))
+
+        mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
+         // mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
+        mat4.translate(wM, wM, this._position);
+        
+        mat4.scale(wM, wM, this._scale);
+        
+
+        
+        // mat && mat4.scale(wM, wM, mat4.getScaling(vec3.create(), mat));
+
+        this.wM = wM;
+        this.setUniforms();
+
+    }
+
     // create default matrix;
     createMatrix = (mat: mat4 | void) => {
 
         const vM = mat4.create();
         mat4.identity(vM);
-        mat4.perspective(vM, glMatrix.toRadian(30), this.canvas.width / this.canvas.height, 1, 1000);
+        this.vM = mat4.perspective(vM, glMatrix.toRadian(30), this.canvas.width / this.canvas.height, 1, 1000);
 
 
         const lM = mat4.create();
         mat4.identity(lM);
-        mat4.lookAt(lM, this._lookAt[0], this._lookAt[1], this._lookAt[2]);
+        this.lM = mat4.lookAt(lM, this._lookAt[0], this._lookAt[1], this._lookAt[2]);
+
+
         var i=0;
         const wM = mat4.create();
         mat4.identity(wM);
-
-        mat4.scale(wM, wM, this._scale);
-
-        mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]])
-       
-        mat4.translate(wM, wM, this._position);
-       
-
         
-        /*
+        // mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
+        // mat4.translate(wM, wM, this._position);
+        // mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat)
+        
         mat4.mul(
-            wM, 
+            this.wM, 
             wM, 
             mat4.fromRotationTranslationScaleOrigin(
                 mat4.create(),
-                mat4.fromRotation(
-                    mat4.create(),
-                    glMatrix.toRadian(this._rotate[i++]), 
-                    [
-                        this._rotate[i++], this._rotate[i++], this._rotate[i++]
-                    ]
-                ), 
+                mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]),
                 this._position, 
                 this._scale,
                 [0, 0, 0]
             )
         );
-*/
-        if( mat ) {
-            mat4.mul(wM, wM, mat);
-        }
 
+        if( mat ) {
+            mat4.mul(this.wM, this.wM, mat);
+        }
+       
         const nM = mat4.create();
         mat4.identity(nM);
         mat4.invert(nM, mat4.mul(mat4.create(), lM, wM));
-        mat4.transpose(nM, nM);
-       
-        // this.matrix = vM;
+        this.nM = mat4.transpose(nM, nM);
+
+        this.matrixCreated = true;
+
+        this.setUniforms();
+
+    }
+
+    setUniforms = () => {
         const u_ProjectionMatrix = this.gl.getUniformLocation(this.program, "u_ProjectionMatrix");
         const u_ViewMatrix = this.gl.getUniformLocation(this.program, "u_ViewMatrix");
         const u_WorldMatrix = this.gl.getUniformLocation(this.program, "u_WorldMatrix");
         const u_NormalMatrix = this.gl.getUniformLocation(this.program, "u_NormalMatrix");
-        this.gl.uniformMatrix4fv(u_ProjectionMatrix, false, vM);
-        this.gl.uniformMatrix4fv(u_ViewMatrix, false, lM);
-        this.gl.uniformMatrix4fv(u_WorldMatrix, false, wM);
-        this.gl.uniformMatrix4fv(u_NormalMatrix, false, nM);
-
-        this.worldMatrix = wM;
-
+        this.gl.uniformMatrix4fv(u_ProjectionMatrix, false, this.vM);
+        this.gl.uniformMatrix4fv(u_ViewMatrix, false, this.lM);
+        this.gl.uniformMatrix4fv(u_WorldMatrix, false, this.wM);
+        this.gl.uniformMatrix4fv(u_NormalMatrix, false, this.nM);
     }
 
     // light up target
