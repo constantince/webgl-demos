@@ -115,7 +115,7 @@ export function createOrbitMesh(resolution: number = 50, radius: number = 1): De
 		vertexs.push(y);
 		pointer.push(index);
 		pointer.push((index + 1) % resolution);
-		color.push(1.0, 1.0, 1.0);
+		color.push(4.0, 0.0, 0.0);
 	}
 
 	return {

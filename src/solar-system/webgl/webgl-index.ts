@@ -1,5 +1,8 @@
 import { clearCanvas, preparation, rotation } from "../../common/base";
 import { Objects } from "../../common/factory";
+import image_sun from "../../images/sun.jpg";
+import image_earth from "../../images/earth.jpg";
+import image_moon from "../../images/moon.jpg";
 
 // the benchmark size of whole canvas sun: 1.0
 const sunSize = 1.0;
@@ -22,7 +25,9 @@ export function main(id: string) {
     const webgl = <WebGL2RenderingContext>canvas.getContext("webgl2");
 
     // the Sun 
-    const Sun = new Objects(webgl, canvas, 'sphere').scale([sunSize, sunSize, sunSize])
+    const Sun = new Objects(webgl, canvas, 'sphere')
+    .scale([sunSize, sunSize, sunSize])
+    .coverImg(image_sun);
     // .position([1, 0, 0]);
 
     // the earth orbit
@@ -35,6 +40,8 @@ export function main(id: string) {
     const Earth = new Objects(webgl, canvas, 'sphere')
     .scale([earthSize, earthSize, earthSize])
     .position([earthXPos, 0.0, 0.0])
+    .coverImg(image_earth)
+    .lightUp([1.0, 1.0, 1.0], [0, 0, 10], [.1, .1, .1], [0, .2, 10])
     .addParent(EarthOrbit);
 
 
@@ -46,8 +53,9 @@ export function main(id: string) {
 
     const Moon = new Objects(webgl, canvas, 'sphere')
     .scale([MoonSize, MoonSize, MoonSize])
+    .coverImg(image_moon)
     .position([moonXPos, 0.0, 0.0])
-    .addParent(MoonOrbit);
+    // .addParent(MoonOrbit);
    
 
 
@@ -66,13 +74,11 @@ export function main(id: string) {
         time *= 0.001;
         preparation(webgl);
         clearCanvas(webgl);
-        Earth.rotate([rotation(0, 15), 0, 1, 0]);
-        Moon.rotate([rotation(0, 45), .2, 1, 0]);
+        Sun.rotate([rotation(0, -1), 0, 1, 0]);
+        Earth.rotate([rotation(0, 15), 0, 1, 0])._rotateY = rotation(0, 100);
+        Moon.rotate([rotation(0, 100),  0, 1, 0]);
         Sun.draw();
        
-        // // console.log(r);
-        // Earth.rotate([r, 0, 1, 0]).draw();
-        // EarthOrbit.draw();
         window.requestAnimationFrame(tick);
     }
 

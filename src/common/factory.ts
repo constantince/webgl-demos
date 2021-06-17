@@ -46,9 +46,9 @@ export const fragmentShader = `#version 300 es
     uniform vec3 u_AmbientColor;
     uniform vec3 u_EyesPosition;
     uniform bool u_HasTexture;
-
+    uniform bool u_Shininess;
     out vec4 FragColor;
-    const float shininess = 120.0;
+    const float shininess = 120.00;
     void main() {
         
         // a·d·s light start
@@ -60,17 +60,22 @@ export const fragmentShader = `#version 300 es
         float specular = 0.0;
         float fDot = max(dot(lightDirection, normal), 0.0);
         
-        if( fDot > 0.0) { // 背面不进行光亮处理
+        if( fDot > 0.0 && u_Shininess) { // 背面不进行光亮处理
             vec3 reflectVec = reflect(-lightDirection, normal);
             specular = pow(dot(reflectVec, eyesToSurface), shininess);
         }
 
         vec4 baseColor = vec4(1.0, 1.0, 1.0, 1.0);
 
-        if ( false ) {
-            vec4 baseColor = texture(u_Sampler, v_TexCoord);    
+        if ( u_HasTexture ) {
+            baseColor = texture(u_Sampler, v_TexCoord);    
         } else {
-            baseColor = v_Color;
+            if (v_Color.r > 1.0) {
+                discard;
+            } else {
+                baseColor = v_Color;
+            }
+            
         }
 
         
@@ -173,6 +178,7 @@ export class Objects implements ObjectClassItem {
     _lookAt = [vec3.fromValues(0, .2, 10), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
     _scale = vec3.fromValues(1, 1, 1);
     _rotate = [glMatrix.toRadian(0), 0, 1, 0];
+    _rotateY = 0;
     drawType:number;
     matrixCreated:boolean = false;
 
@@ -372,9 +378,8 @@ export class Objects implements ObjectClassItem {
         // if (mat) { 
         //     mat4.mul(wM, wM, mat);
         // }
-
         mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat))
-
+        // 公转
         mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
          // mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
         mat4.translate(wM, wM, this._position);
@@ -382,10 +387,23 @@ export class Objects implements ObjectClassItem {
         mat4.scale(wM, wM, this._scale);
         
 
+       
+
+        // 自转
+        const rM = mat4.create();
+        mat4.identity(rM);
+        mat4.rotate(rM, rM, glMatrix.toRadian(this._rotateY), [0, 1, 0]);
+
+        const nM = mat4.create();
+        mat4.identity(nM);
+        mat4.invert(nM, rM);
+        this.nM = mat4.transpose(nM, nM);
         
         // mat && mat4.scale(wM, wM, mat4.getScaling(vec3.create(), mat));
 
-        this.wM = wM;
+      
+        this.wM = mat4.mul(wM, wM, rM);
+
         this.setUniforms();
 
     }
