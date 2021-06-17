@@ -534,12 +534,71 @@ export function calculateVertexSphere(
 	};
 }
 
+export function xxxmm(latitudeBands = 60, longitudeBands = 60, radius = 1)
+{
+    var vertexPositionData:number[] = [];
+    var normalData:number[] = [];
+    var textureCoordData:number[] = [];
+    for(var latNumber = 0; latNumber <= latitudeBands; latNumber ++)
+    {
+        var theta = latNumber * Math.PI / latitudeBands;
+        var sinTheta = Math.sin(theta);
+        var cosTheta = Math.cos(theta);
+        for(var longNumber = 0; longNumber <= longitudeBands; longNumber ++)
+        {
+            var phi = longNumber * 2 * Math.PI / longitudeBands;
+            var sinPhi = Math.sin(phi);
+            var cosPhi = Math.cos(phi);
+            var x = cosPhi * sinTheta;
+            var y = cosTheta;
+            var z = sinPhi * sinTheta;
+            var u = 1 - (longNumber / longitudeBands);
+            var v = 1 - (latNumber / latitudeBands);
+
+            normalData.push(x);
+            normalData.push(y);
+            normalData.push(z);
+            textureCoordData.push(u);
+            textureCoordData.push(v);
+            vertexPositionData.push(radius * x);
+            vertexPositionData.push(radius * y);
+            vertexPositionData.push(radius * z);
+        }
+    }
+
+	var indexData:number[] = [];
+    for(var latNumber = 0; latNumber < latitudeBands; latNumber ++)
+    {
+        for(var longNumber = 0; longNumber < longitudeBands; longNumber ++)
+        {
+            var first = (latNumber * (longitudeBands + 1)) + longNumber;
+            var second = first + longitudeBands + 1;
+            indexData.push(first);
+            indexData.push(second);
+            indexData.push(first + 1);
+            indexData.push(second);
+            indexData.push(second + 1);
+            indexData.push(first + 1);
+        }
+    }
+
+	return {
+		vertex: new Float32Array(vertexPositionData),
+		pointer: new Uint16Array(indexData),
+		color: new Float32Array([]),
+		count: indexData.length,
+		normal: new Float32Array(normalData),
+		texcoord: new Float32Array(textureCoordData),
+	};
+    // return {vertexPositionData, textureCoordData, normalData};
+}
+
 export function test() { // Create a sphere
 	  var SPHERE_DIV = 60;
 	  var i, ai, si, ci;
 	  var j, aj, sj, cj;
 	  var p1, p2;
-	  var vertices = [],indices = [], colors = [];
+	  var vertices = [],indices = [], colors = [], texcoord = [];
 	  for (j = 0; j <= SPHERE_DIV; j++) 
 	  {
 		aj = j * Math.PI / SPHERE_DIV;
@@ -553,6 +612,11 @@ export function test() { // Create a sphere
 		  vertices.push(si * sj);  // X
 		  vertices.push(cj);       // Y
 		  vertices.push(ci * sj);  // Z
+
+
+		  var u = 1 - i / SPHERE_DIV;
+		 var v = 1 - j / SPHERE_DIV;
+		texcoord.push(u, v);
 		  colors.push(1.0, 0.0, 0.0);
 		}
 	  } // <------------------------------------------------------------- ADD 
@@ -593,7 +657,7 @@ export function test() { // Create a sphere
 		color: new Float32Array(colors),
 		count: indices.length,
 		normal: new Float32Array(vertices),
-		texcoord: new Float32Array([]),
+		texcoord: new Float32Array(texcoord),
 	};
   }
 

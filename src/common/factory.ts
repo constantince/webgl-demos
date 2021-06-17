@@ -1,6 +1,6 @@
 import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 import { createFrameBuffer, initBuffer, initShader} from "./base";
-import { createCubeMesh, SphereMesh, calculateVertexSphere, test, createOrbitMesh } from "./primative";
+import { createCubeMesh, SphereMesh, calculateVertexSphere, test, xxxmm, createOrbitMesh } from "./primative";
 export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
@@ -175,7 +175,7 @@ export class Objects implements ObjectClassItem {
     _position = V3;
     children: Objects[] = [];
     parent: Objects | null = null;
-    _lookAt = [vec3.fromValues(0, .2, 10), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
+    _lookAt = [vec3.fromValues(0, 1, 15), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
     _scale = vec3.fromValues(1, 1, 1);
     _rotate = [glMatrix.toRadian(0), 0, 1, 0];
     _rotateY = 0;
@@ -261,7 +261,7 @@ export class Objects implements ObjectClassItem {
             case "cube":
                 return createCubeMesh();
             case "sphere":
-                return calculateVertexSphere();
+                return test();
             case "orbit":
                 return createOrbitMesh();
 
@@ -375,34 +375,26 @@ export class Objects implements ObjectClassItem {
         const wM = mat4.create();
         mat4.identity(wM);
 
-        // if (mat) { 
-        //     mat4.mul(wM, wM, mat);
-        // }
-        mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat))
+        mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat));
         // 公转
+
         mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
-         // mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
+        // mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
         mat4.translate(wM, wM, this._position);
         
         mat4.scale(wM, wM, this._scale);
-        
-
-       
 
         // 自转
-        const rM = mat4.create();
-        mat4.identity(rM);
-        mat4.rotate(rM, rM, glMatrix.toRadian(this._rotateY), [0, 1, 0]);
+        mat4.rotate(wM, wM, glMatrix.toRadian(this._rotateY), [0, 1, 0]);
 
         const nM = mat4.create();
         mat4.identity(nM);
-        mat4.invert(nM, rM);
+        mat4.invert(nM, wM);
         this.nM = mat4.transpose(nM, nM);
-        
-        // mat && mat4.scale(wM, wM, mat4.getScaling(vec3.create(), mat));
 
-      
-        this.wM = mat4.mul(wM, wM, rM);
+
+        this.wM = wM;
+
 
         this.setUniforms();
 
