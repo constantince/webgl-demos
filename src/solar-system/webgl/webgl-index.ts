@@ -6,8 +6,12 @@ import image_moon from "../../images/moon.jpg";
 import image_mars from "../../images/mars.jpg";
 import image_mercury from "../../images/mercury.jpg";
 import image_venus from "../../images/venus.jpg";
+import image_jupiter from "../../images/jupiter.jpg";
+import image_saturn from "../../images/saturn.jpg";
 // the benchmark size of whole canvas sun: 1.0
 const sunSize = 1.0;
+
+const publicRotateFactor = 0.5;
 
 
 
@@ -17,7 +21,7 @@ const earthSize = sunSize / 6;
 
 const earthXPos = earthOrbitSize;
 
-const MoonSize = earthSize * 0.5;
+const MoonSize = earthSize * 0.45;
 
 const moonOrbitSize = earthSize * 3;
 
@@ -40,6 +44,19 @@ const venusSize = earthSize * .45;
 const venusOrbitSize = sunSize * 3;
 
 const venuseXPos = venusOrbitSize;
+
+const jupiterSize = earthSize * 2;
+
+const jupiterOrbitSize = sunSize * 10;
+
+const jupiterXPos = jupiterOrbitSize;
+
+
+const saturnSize = earthSize * 1.5;
+
+const saturnOrbitSize = sunSize * 12;
+
+const saturnXPos = saturnOrbitSize;
 
 
 export function main(id: string) {
@@ -114,6 +131,18 @@ export function main(id: string) {
     .coverImg(image_mercury)
     .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.1, .1, .1], [0, 0, 0])
     .addParent(mercuryOrbit);
+
+
+    const saturnOrbit = new Objects(webgl, canvas, 'orbit', webgl.LINE_LOOP)
+    .scale([saturnOrbitSize, saturnOrbitSize, saturnOrbitSize])
+    .addParent(Sun);
+
+    const Saturn =  new Objects(webgl, canvas, 'sphere')
+    .scale([saturnSize, saturnSize, saturnSize])
+    .position([saturnXPos, 0, 0])
+    .coverImg(image_saturn)
+    .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.1, .1, .1], [0, 0, 0])
+    .addParent(saturnOrbit);
    
 
 
@@ -134,15 +163,19 @@ export function main(id: string) {
         clearCanvas(webgl);
         Sun.rotate([rotation(0, -1), 0, 1, 0]);
         // 水星
-        Mercury.rotate([rotation(0, 15),  0, 1, 0])._rotateY = rotation(0, 45);
+        Mercury.rotate([rotation(0, 10 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 45);
         // 金星
-        Venus.rotate([rotation(0, 10),  0, 1, 0])._rotateY = rotation(0, 70);
+        Venus.rotate([rotation(0, 9 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 70);
         // 月球
-        Moon.rotate([rotation(0, 5),  0, 1, 0])._rotateY = rotation(0, 60);
+        Moon.rotate([rotation(0, 8 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 60);
         // 地球
-        Earth.rotate([rotation(0, 5), 0, 1, 0])._rotateY = rotation(0, -100);
+        Earth.rotate([rotation(0, 8 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -100);
         // 火星
-        Mars.rotate([rotation(0, 4), 0, 1, 0])._rotateY = rotation(0, -90);
+        Mars.rotate([rotation(0, 7 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
+
+
+        //金星
+        Saturn.rotate([rotation(0, 6 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
         
        
         
