@@ -109,6 +109,7 @@ export function createOrbitMesh(resolution: number = 50, radius: number = 1.5): 
 	let vertexs: number[] = [];
 	let color: number[] = [];
 	let pointer: number[] = [];
+	let normal: number[] = [];
 	for (let index = 0; index < resolution; index++) {
 		let x = Math.sin(radiation * index) * radius;
 		let y = Math.cos(radiation * index) * radius;
@@ -118,6 +119,7 @@ export function createOrbitMesh(resolution: number = 50, radius: number = 1.5): 
 		pointer.push(index);
 		pointer.push((index + 1) % resolution);
 		color.push(1.0, 1.0, 1.0);
+		normal.push(0, 1, 0);
 	}
 
 	return {

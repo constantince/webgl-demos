@@ -310,7 +310,8 @@ export function resizeCanvasToDisplaySize(canvas:HTMLCanvasElement) {
 
 export function preparation(gl: WebGL2RenderingContext) {
 	gl.enable(gl.DEPTH_TEST);
-	gl.enable(gl.CULL_FACE);
+	// gl.enable(gl.CULL_FACE);
+	// gl.cullFace(gl.BACK);
 	gl.clearColor(.1, .1, .1 , 1);
 }
 

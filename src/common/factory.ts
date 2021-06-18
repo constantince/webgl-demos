@@ -175,7 +175,7 @@ export class Objects implements ObjectClassItem {
     _position = V3;
     children: Objects[] = [];
     parent: Objects | null = null;
-    _lookAt = [vec3.fromValues(0, 20, 25), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
+    _lookAt = [vec3.fromValues(0, 5, 20), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
     _scale = vec3.fromValues(1, 1, 1);
     _rotate = [glMatrix.toRadian(0), 0, 1, 0];
     _rotateY = 0;
@@ -418,32 +418,31 @@ export class Objects implements ObjectClassItem {
         var i=0;
         const wM = mat4.create();
         mat4.identity(wM);
-        
-        // mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
-        // mat4.translate(wM, wM, this._position);
-        // mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat)
-        
-        mat4.mul(
-            this.wM, 
-            wM, 
-            mat4.fromRotationTranslationScaleOrigin(
-                mat4.create(),
-                mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]),
-                this._position, 
-                this._scale,
-                [0, 0, 0]
-            )
-        );
 
-        if( mat ) {
-            mat4.mul(this.wM, this.wM, mat);
+       
+        
+        mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]);
+        mat4.translate(wM, wM, this._position);
+        mat4.scale(wM, wM, this._scale);
+        // mat && mat4.translate(wM, wM, mat4.getTranslation(vec3.create(), mat)
+         
+        // mat4.fromRotationTranslationScale(
+        //     wM,
+        //     mat4.rotate(wM, wM, glMatrix.toRadian(this._rotate[i++]), [ this._rotate[i++], this._rotate[i++], this._rotate[i++]]),
+        //     this._position, 
+        //     this._scale
+        // );
+        
+        // 初次不需要变化外部矩阵。
+        if( mat && this.matrixCreated === true) {
+            mat4.mul(wM, wM, mat);
         }
        
         const nM = mat4.create();
         mat4.identity(nM);
         mat4.invert(nM, mat4.mul(mat4.create(), lM, wM));
         this.nM = mat4.transpose(nM, nM);
-
+        this.wM = wM;
         this.matrixCreated = true;
 
         this.setUniforms();

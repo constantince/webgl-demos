@@ -12,7 +12,7 @@ import image_saturn from "../../images/saturn.jpg";
 const sunSize = 1.0;
 const distanceUnit = 1.0;
 
-const publicRotateFactor = 0.5;
+const publicRotateFactor = .8;
 
 const earthOrbitSize = distanceUnit * 3;
 
@@ -30,7 +30,7 @@ const mercuryXPos = distanceUnit * 1.5;
 
 const MoonSize = earthSize * 0.45;
 
-const moonOrbitSize = earthSize * 3;
+const moonOrbitSize = earthSize * 1.3;
 
 const moonXPos = moonOrbitSize * 1.5;
 
@@ -62,7 +62,7 @@ const jupiterXPos = jupiterOrbitSize * 1.5;
 
 const saturnSize = earthSize * 2;
 
-const saturnOrbitSize = distanceUnit * 7.5;
+const saturnOrbitSize = distanceUnit * 9;
 
 const saturnXPos = saturnOrbitSize * 1.5;
 
@@ -170,11 +170,11 @@ export function main(id: string) {
 
     const SaturnRing = new Objects(webgl, canvas, 'ring', webgl.TRIANGLE_STRIP)
     .scale([saturnRingSize * 1.3, saturnRingSize, saturnRingSize])
+    // .position([saturnXPos, 0, 0])
+    .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.3, .3, .3], [0, 0, 0])
     .addParent(Saturn);
+
    
-
-
-
 
 
 
@@ -197,17 +197,15 @@ export function main(id: string) {
         // 月球
         Moon.rotate([rotation(initPosition[3], 18 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 60);
         // 地球
-        Earth.rotate([rotation(initPosition[4], 8 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -100);
+        Earth.rotate([rotation(initPosition[4], 8 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -60);
         // 火星
-        Mars.rotate([rotation(initPosition[5], 4 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
+        Mars.rotate([rotation(initPosition[5], 4 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -10);
         //木星
-        Jupiter.rotate([rotation(initPosition[6], 2 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -100);
+        Jupiter.rotate([rotation(initPosition[6], 3 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -20);
 
-        //金星
-        Saturn.rotate([rotation(initPosition[7], 1 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
-        SaturnRing.rotate([-20, 1, 0, 1]);
-        
-       
+        // 金星
+        Saturn.rotate([rotation(initPosition[7], 2 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -10);
+        SaturnRing.rotate([40, 1, 1, 0]);
         
 
         Sun.draw();
@@ -217,7 +215,16 @@ export function main(id: string) {
         window.requestAnimationFrame(tick);
     }
 
+   setTimeout(() => {
     window.requestAnimationFrame(tick);
+   }, 0);
+    // window.requestAnimationFrame(tick);
+    
+
+    // setTimeout(() => {
+    //     window.requestAnimationFrame(tick);
+    // }, 5000)
+    
 
 }
 
