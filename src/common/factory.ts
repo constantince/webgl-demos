@@ -1,6 +1,6 @@
 import { glMatrix, mat4, quat, vec3 } from "gl-matrix";
 import { createFrameBuffer, initBuffer, initShader} from "./base";
-import { createCubeMesh, SphereMesh, calculateVertexSphere, test, xxxmm, createOrbitMesh } from "./primative";
+import { createCubeMesh, SphereMesh, calculateVertexSphere, test, createOrbitMesh, createRingMesh } from "./primative";
 export const vertexShader = `#version 300 es
     in vec4 a_Position;
     in vec4 a_Color;
@@ -175,7 +175,7 @@ export class Objects implements ObjectClassItem {
     _position = V3;
     children: Objects[] = [];
     parent: Objects | null = null;
-    _lookAt = [vec3.fromValues(0, 1, 15), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
+    _lookAt = [vec3.fromValues(0, 20, 25), vec3.fromValues(0, 0, 0), vec3.fromValues(0, 1, 0)];
     _scale = vec3.fromValues(1, 1, 1);
     _rotate = [glMatrix.toRadian(0), 0, 1, 0];
     _rotateY = 0;
@@ -217,7 +217,7 @@ export class Objects implements ObjectClassItem {
     }
 
     transverse =() => {
-        if( this.children ) {
+        if( this.children && this.children.length > 0) {
             this.children.forEach(child => {
                 // update children's matrix with own world matrix;
                 child.draw(this.wM, true);
@@ -264,6 +264,8 @@ export class Objects implements ObjectClassItem {
                 return test();
             case "orbit":
                 return createOrbitMesh();
+            case "ring":
+                return createRingMesh();
 
             default:
                 return createCubeMesh();

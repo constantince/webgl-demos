@@ -10,54 +10,64 @@ import image_jupiter from "../../images/jupiter.jpg";
 import image_saturn from "../../images/saturn.jpg";
 // the benchmark size of whole canvas sun: 1.0
 const sunSize = 1.0;
+const distanceUnit = 1.0;
 
 const publicRotateFactor = 0.5;
 
+const earthOrbitSize = distanceUnit * 3;
+
+const earthSize = sunSize / 4;
+
+const earthXPos = earthOrbitSize * 1.5;
 
 
-const earthOrbitSize = sunSize * 4;
+const mercurySize = earthSize * 0.5;
 
-const earthSize = sunSize / 6;
+const mercuryOrbitSize = distanceUnit;
 
-const earthXPos = earthOrbitSize;
+const mercuryXPos = distanceUnit * 1.5;
+
 
 const MoonSize = earthSize * 0.45;
 
 const moonOrbitSize = earthSize * 3;
 
-const moonXPos = moonOrbitSize;
+const moonXPos = moonOrbitSize * 1.5;
+
+
 
 const marsSize = earthSize * 0.8;
 
-const marsOrbitSize = sunSize * 7;
+const marsOrbitSize = distanceUnit * 4;
 
-const marsXPos = marsOrbitSize;
+const marsXPos = marsOrbitSize * 1.5;
 
-const mercurySize = earthSize * 0.5;
 
-const mercuryOrbitSize = sunSize * 2;
-
-const mercuryXPos = mercuryOrbitSize;
 
 const venusSize = earthSize * .45;
 
-const venusOrbitSize = sunSize * 3;
+const venusOrbitSize = distanceUnit * 2;
 
-const venuseXPos = venusOrbitSize;
-
-const jupiterSize = earthSize * 2;
-
-const jupiterOrbitSize = sunSize * 10;
-
-const jupiterXPos = jupiterOrbitSize;
+const venuseXPos = venusOrbitSize * 1.5;
 
 
-const saturnSize = earthSize * 1.5;
 
-const saturnOrbitSize = sunSize * 12;
 
-const saturnXPos = saturnOrbitSize;
+const jupiterSize = earthSize * 3;
 
+const jupiterOrbitSize = distanceUnit * 6;
+
+const jupiterXPos = jupiterOrbitSize * 1.5;
+
+
+const saturnSize = earthSize * 2;
+
+const saturnOrbitSize = distanceUnit * 7.5;
+
+const saturnXPos = saturnOrbitSize * 1.5;
+
+
+const saturnRingSize = earthSize * 2.5;
 
 export function main(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
@@ -68,6 +78,19 @@ export function main(id: string) {
     .scale([sunSize, sunSize, sunSize])
     .coverImg(image_sun)
     // .position([3, 0, 0]);
+
+
+
+    const mercuryOrbit = new Objects(webgl, canvas, 'orbit', webgl.LINE_LOOP)
+    .scale([mercuryOrbitSize, mercuryOrbitSize, mercuryOrbitSize])
+    .addParent(Sun);
+
+    const Mercury =  new Objects(webgl, canvas, 'sphere')
+    .scale([mercurySize, mercurySize, mercurySize])
+    .position([mercuryXPos, 0, 0])
+    .coverImg(image_mercury)
+    .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.1, .1, .1], [0, 0, 0])
+    .addParent(mercuryOrbit);
 
     // the earth orbit
     const EarthOrbit = new Objects(webgl, canvas, 'orbit', webgl.LINE_LOOP)
@@ -121,16 +144,16 @@ export function main(id: string) {
     .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.1, .1, .1], [0, 0, 0])
     .addParent(venusOrbit);
 
-    const mercuryOrbit = new Objects(webgl, canvas, 'orbit', webgl.LINE_LOOP)
-    .scale([mercuryOrbitSize, mercuryOrbitSize, mercuryOrbitSize])
+    const jupiterOrbit = new Objects(webgl, canvas, 'orbit', webgl.LINE_LOOP)
+    .scale([jupiterOrbitSize, jupiterOrbitSize, jupiterOrbitSize])
     .addParent(Sun);
 
-    const Mercury =  new Objects(webgl, canvas, 'sphere')
-    .scale([mercurySize, mercurySize, mercurySize])
-    .position([mercuryXPos, 0, 0])
-    .coverImg(image_mercury)
+    const Jupiter =  new Objects(webgl, canvas, 'sphere')
+    .scale([jupiterSize, jupiterSize, jupiterSize])
+    .position([jupiterXPos, 0, 0])
+    .coverImg(image_jupiter)
     .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.1, .1, .1], [0, 0, 0])
-    .addParent(mercuryOrbit);
+    .addParent(jupiterOrbit);
 
 
     const saturnOrbit = new Objects(webgl, canvas, 'orbit', webgl.LINE_LOOP)
@@ -143,6 +166,11 @@ export function main(id: string) {
     .coverImg(image_saturn)
     .lightUp([1.0, 1.0, 1.0], [0, 0, 0], [.1, .1, .1], [0, 0, 0])
     .addParent(saturnOrbit);
+
+
+    const SaturnRing = new Objects(webgl, canvas, 'ring', webgl.TRIANGLE_STRIP)
+    .scale([saturnRingSize * 1.3, saturnRingSize, saturnRingSize])
+    .addParent(Saturn);
    
 
 
@@ -153,36 +181,38 @@ export function main(id: string) {
 
 
 
-
-
+    const initPosition = new Array(20).fill(0).map(v => Math.random() * 365);
+    console.log(initPosition)
 
 
     var tick = (time:number) => {
         time *= 0.001;
         preparation(webgl);
         clearCanvas(webgl);
-        Sun.rotate([rotation(0, -1), 0, 1, 0]);
+        Sun.rotate([rotation(initPosition[0], -1), 0, 1, 0]);
         // 水星
-        Mercury.rotate([rotation(0, 10 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 45);
+        Mercury.rotate([rotation(initPosition[1], 20 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 45);
         // 金星
-        Venus.rotate([rotation(0, 9 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 70);
+        Venus.rotate([rotation(initPosition[2], 15 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 70);
         // 月球
-        Moon.rotate([rotation(0, 8 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 60);
+        Moon.rotate([rotation(initPosition[3], 18 * publicRotateFactor),  0, 1, 0])._rotateY = rotation(0, 60);
         // 地球
-        Earth.rotate([rotation(0, 8 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -100);
+        Earth.rotate([rotation(initPosition[4], 8 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -100);
         // 火星
-        Mars.rotate([rotation(0, 7 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
-
+        Mars.rotate([rotation(initPosition[5], 4 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
+        //木星
+        Jupiter.rotate([rotation(initPosition[6], 2 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -100);
 
         //金星
-        Saturn.rotate([rotation(0, 6 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
+        Saturn.rotate([rotation(initPosition[7], 1 * publicRotateFactor), 0, 1, 0])._rotateY = rotation(0, -90);
+        SaturnRing.rotate([-20, 1, 0, 1]);
         
        
         
 
-
-
         Sun.draw();
+        // SaturnRing.draw();
+        // Saturn.draw();
        
         window.requestAnimationFrame(tick);
     }

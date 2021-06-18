@@ -1,3 +1,5 @@
+import { translateToWebglColor } from "./base";
+
 //计算出立方体的各个点的位置
 export type VertexObjectsBuffer = {
 	vertex: Float32Array;
@@ -99,7 +101,7 @@ export function createStarMesh(): Demention2 {
 	};
 }
 
-export function createOrbitMesh(resolution: number = 50, radius: number = 1): Demention3 {
+export function createOrbitMesh(resolution: number = 50, radius: number = 1.5): Demention3 {
 
 	//将夹角转换成弧度
 	const radiation = (Math.PI / 180) * (360 / resolution);
@@ -115,7 +117,7 @@ export function createOrbitMesh(resolution: number = 50, radius: number = 1): De
 		vertexs.push(y);
 		pointer.push(index);
 		pointer.push((index + 1) % resolution);
-		color.push(4.0, 0.0, 0.0);
+		color.push(1.0, 1.0, 1.0);
 	}
 
 	return {
@@ -534,63 +536,39 @@ export function calculateVertexSphere(
 	};
 }
 
-export function xxxmm(latitudeBands = 60, longitudeBands = 60, radius = 1)
-{
-    var vertexPositionData:number[] = [];
-    var normalData:number[] = [];
-    var textureCoordData:number[] = [];
-    for(var latNumber = 0; latNumber <= latitudeBands; latNumber ++)
-    {
-        var theta = latNumber * Math.PI / latitudeBands;
-        var sinTheta = Math.sin(theta);
-        var cosTheta = Math.cos(theta);
-        for(var longNumber = 0; longNumber <= longitudeBands; longNumber ++)
-        {
-            var phi = longNumber * 2 * Math.PI / longitudeBands;
-            var sinPhi = Math.sin(phi);
-            var cosPhi = Math.cos(phi);
-            var x = cosPhi * sinTheta;
-            var y = cosTheta;
-            var z = sinPhi * sinTheta;
-            var u = 1 - (longNumber / longitudeBands);
-            var v = 1 - (latNumber / latitudeBands);
+export function createRingMesh(resolution: number = 50, radius: number = 1): Demention3 {
+	//将夹角转换成弧度
+	const radiation = (Math.PI / 180) * (360 / resolution);
+	const factor = 0.6;
+		//中心位置
+	let vertexs: number[] = [];
+	let color: number[] = [];
+	let pointer: number[] = [];
+	for (let index = 0; index <= resolution; index++) {
+		let x = Math.sin(radiation * index) * radius;
+		let y = Math.cos(radiation * index) * radius;
+		vertexs.push(x);
+		vertexs.push(0);
+		vertexs.push(y);
 
-            normalData.push(x);
-            normalData.push(y);
-            normalData.push(z);
-            textureCoordData.push(u);
-            textureCoordData.push(v);
-            vertexPositionData.push(radius * x);
-            vertexPositionData.push(radius * y);
-            vertexPositionData.push(radius * z);
-        }
-    }
+		vertexs.push(x + x * factor);
+		vertexs.push(0);
+		vertexs.push(y + y * factor);
 
-	var indexData:number[] = [];
-    for(var latNumber = 0; latNumber < latitudeBands; latNumber ++)
-    {
-        for(var longNumber = 0; longNumber < longitudeBands; longNumber ++)
-        {
-            var first = (latNumber * (longitudeBands + 1)) + longNumber;
-            var second = first + longitudeBands + 1;
-            indexData.push(first);
-            indexData.push(second);
-            indexData.push(first + 1);
-            indexData.push(second);
-            indexData.push(second + 1);
-            indexData.push(first + 1);
-        }
-    }
+		pointer.push(2*index + 1);
+		pointer.push((2*index + 2) % (2 * resolution));
+		const ringColor = translateToWebglColor("#ffffca")
+		color.push(ringColor[0], ringColor[1],ringColor[2], ringColor[0], ringColor[1],ringColor[2]);
+	}
 
 	return {
-		vertex: new Float32Array(vertexPositionData),
-		pointer: new Uint16Array(indexData),
-		color: new Float32Array([]),
-		count: indexData.length,
-		normal: new Float32Array(normalData),
-		texcoord: new Float32Array(textureCoordData),
-	};
-    // return {vertexPositionData, textureCoordData, normalData};
+		vertex: new Float32Array(vertexs),
+		count: pointer.length,
+		color: new Float32Array(color),
+		pointer: new Uint16Array(pointer),
+		texcoord: new Float32Array([]),
+		normal: new Float32Array([])
+	} 
 }
 
 export function test() { // Create a sphere
