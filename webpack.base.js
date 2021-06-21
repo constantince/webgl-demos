@@ -28,7 +28,7 @@ const setMPA = () => {
     console.log(entry);
     return {
         entry: {
-            "solar-system": "./src/solar-system/index.tsx"
+            lab: "./src/lab/index.tsx"
         },
         // entry,
         plugins

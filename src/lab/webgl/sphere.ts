@@ -3,7 +3,8 @@ import { initBuffer, initShader, rotation } from "../../common/base";
 import { calculateVertexSphere, createCubeMesh } from "../../common/primative";
 import { vertex_box, frag_ment_box } from "./shaders";
 export const vertexShader = `#version 300 es
-    in vec4 a_Position;
+    layout(location=0) in vec4 a_Position;
+    layout(location=1) in vec4 b_Position;
     in vec4 a_Color;
     in vec2 a_TexCoord;
     in vec4 a_Normal;
@@ -29,13 +30,15 @@ export const vertexShader = `#version 300 es
 
 export const fragmentShader = `#version 300 es
     precision mediump float;
+    precision lowp sampler3D;
+    uniform sampler3D Noise;
     in vec4 v_Color;
     in vec2 v_TexCoord;
     in vec3 v_Normal;
     in vec4 v_WorldPosition;
 
    
-    uniform sampler2D u_Sampler;
+    // uniform sampler2D u_Sampler;
 
     
     uniform bool f_Line;
@@ -46,6 +49,8 @@ export const fragmentShader = `#version 300 es
     uniform vec3 u_LightColor;
     uniform vec3 u_AmbientColor;
 
+   
+
 
     out vec4 FragColor;
     void main() {
@@ -54,11 +59,17 @@ export const fragmentShader = `#version 300 es
         // vec3 lightDirection = normalize(vec3(1.0, 1.0, 1.0));
         float fDot = max(dot(normal, lightDirection), 0.0);
 
-        vec3 diffuse = u_LightColor * v_Color.rgb * fDot;
-        vec3 ambient = u_AmbientColor * v_Color.rgb;
+        // vec3 diffuse = u_LightColor * v_Color.rgb * fDot;
+        // vec3 ambient = u_AmbientColor * v_Color.rgb;
 
-        vec3 color = diffuse;
-        FragColor = vec4(diffuse + ambient, v_Color.a);
+        // vec3 color = diffuse;
+        // FragColor = vec4(diffuse + ambient, v_Color.a);
+
+        vec4 noisevec = texture(Noise, v_WorldPosition.xyz);
+        float intensity = abs(noisevec[0] - .25) + abs(noisevec[0] - .125) + abs(noisevec[0] - .0625) + abs(noisevec[0] - .03125);
+        intensity = clamp(intensity * 10.0, 0.0, 1.0);
+        vec3 color = mix(vec3(0.8, 0.7, 0.0), vec3(0.6, 0.1, 0.0), intensity) * fDot;
+        FragColor = vec4(color, 1.0);
   
     }
 `;
@@ -134,7 +145,7 @@ const createMatrix = (gl: WebGL2RenderingContext, program: WebGLProgram, a: numb
 
 // light up target
 const lightUp = (gl: WebGL2RenderingContext, program: WebGLProgram, lightColor: number[], lightPosition: number[], ambient: number[]) => {
-    const m = vec3.fromValues(1.0, 1.0, 1.0);
+    const m = vec3.fromValues(1.0, 8.0, 1.0);
     vec3.normalize(m, m);
 
     const k = vec3.fromValues(10.0, 0.0, 0.0);
@@ -146,6 +157,6 @@ const lightUp = (gl: WebGL2RenderingContext, program: WebGLProgram, lightColor: 
     const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
     const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
-    gl.uniform3f(u_LightPosition, 10.0, 0.0, 0.0);
+    gl.uniform3f(u_LightPosition, 10.0, 8.0, 0.0);
     gl.uniform3f(u_AmbientColor, 0.1, 0.1, 0.1);
 };
