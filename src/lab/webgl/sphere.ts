@@ -156,7 +156,9 @@ const lightUp = (gl: WebGL2RenderingContext, program: WebGLProgram, lightColor: 
     const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
     const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
     const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
+    const Noise = gl.getUniformLocation(program, "Noise");
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
     gl.uniform3f(u_LightPosition, 10.0, 8.0, 0.0);
     gl.uniform3f(u_AmbientColor, 0.1, 0.1, 0.1);
+    gl.uniform1f(Noise, 0);
 };
