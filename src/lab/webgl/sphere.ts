@@ -49,6 +49,38 @@ export const fragmentShader = `#version 300 es
     uniform vec3 u_LightColor;
     uniform vec3 u_AmbientColor;
 
+    uniform vec2 u_resoslution;
+    uniform float u_time;
+    float random(vec2 uv) {
+        return fract ( sin(uv.x * 100. + uv.y * 6500.) * 5667.);
+    }
+    
+    float SmoothNoise(vec2 uv) {
+        vec2 lv =fract(uv);
+        vec2 id = floor(uv);
+         lv  = lv*lv*(3.- 2. * lv);
+        float bl = random(id);
+        float br = random(id + vec2(1., 0.));
+        float b = mix(bl, br, lv.x);
+    
+        float tl = random(id + vec2(0., 1.));
+        float tr = random(id + vec2(1., 1.));
+        float t = mix(tl, tr, lv.x);
+    
+        return mix(b, t, lv.y);
+    }
+    
+    float SoomthNoise2(vec2 uv) {
+    
+        float c = SmoothNoise(uv * 4.);
+        c += SmoothNoise(uv * 8.) * .5;
+        c += SmoothNoise(uv * 16.) * .25;
+        c += SmoothNoise(uv *32.) * .125;
+        c += SmoothNoise(uv *64.) * .0625;
+    
+        return c /= 2.;
+    
+    }
    
 
 
@@ -64,11 +96,12 @@ export const fragmentShader = `#version 300 es
 
         // vec3 color = diffuse;
         // FragColor = vec4(diffuse + ambient, v_Color.a);
-
-        vec4 noisevec = texture(Noise, v_WorldPosition.xyz);
-        float intensity = abs(noisevec[0] - .25) + abs(noisevec[0] - .125) + abs(noisevec[0] - .0625) + abs(noisevec[0] - .03125);
-        intensity = clamp(intensity * 10.0, 0.0, 1.0);
-        vec3 color = mix(vec3(0.8, 0.7, 0.0), vec3(0.6, 0.1, 0.0), intensity) * fDot;
+        vec2 uv = v_WorldPosition.yz;
+        // uv += u_time * .0001;
+        float c = SoomthNoise2(uv);
+        vec3 color1 = vec3(c);
+        vec3 color = vec3(1.0, 0., 0.);
+        color *= color1;
         FragColor = vec4(color, 1.0);
   
     }
@@ -82,7 +115,7 @@ export function main_sphere(id: string) {
     webgl.clearColor(0.0, 0.0, 0.0, 1.0);
     webgl.enable(webgl.DEPTH_TEST);
 
-    const { normal, count, color, vertex, pointer} = calculateVertexSphere()
+    const { normal, count, color, vertex, pointer} = calculateVertexSphere(10)
     
     
     
@@ -97,9 +130,9 @@ export function main_sphere(id: string) {
         initBuffer(webgl, program, pointer, null, null, webgl.ELEMENT_ARRAY_BUFFER);
         lightUp(webgl, program, [1.0, 1.0, 1.0], [-10, -4.0, -3.5], [0.2, 0.2, 0.2]);
 
-        const tick = () => {
+        const tick = (time:number) => {
             const a = rotation(0, 45);
-            createMatrix(webgl, program, a);
+            createMatrix(webgl, program, time, a);
             webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
             webgl.drawElements(webgl.TRIANGLES, count, webgl.UNSIGNED_SHORT, 0);
             window.requestAnimationFrame(tick);
@@ -110,7 +143,7 @@ export function main_sphere(id: string) {
 }
 
 // create default matrix;
-const createMatrix = (gl: WebGL2RenderingContext, program: WebGLProgram, a: number) => {
+const createMatrix = (gl: WebGL2RenderingContext, program: WebGLProgram, time: number, angle: number) => {
 
     const vM = mat4.create();
     mat4.identity(vM);
@@ -124,7 +157,7 @@ const createMatrix = (gl: WebGL2RenderingContext, program: WebGLProgram, a: numb
 
     const wM = mat4.create();
     mat4.identity(wM);
-    mat4.rotate(wM, wM, glMatrix.toRadian(60), [0, 1, 0])
+    mat4.rotate(wM, wM, glMatrix.toRadian(angle), [0, 1, 0])
 
     const nM = mat4.create();
     mat4.identity(nM);
@@ -136,10 +169,12 @@ const createMatrix = (gl: WebGL2RenderingContext, program: WebGLProgram, a: numb
     const u_ViewMatrix =gl.getUniformLocation(program, "u_ViewMatrix");
     const u_WorldMatrix =gl.getUniformLocation(program, "u_WorldMatrix");
     const u_NormalMatrix =gl.getUniformLocation(program, "u_NormalMatrix");
+    const u_time = gl.getUniformLocation(program, "u_time");
     gl.uniformMatrix4fv(u_ProjectionMatrix, false, vM);
     gl.uniformMatrix4fv(u_ViewMatrix, false, lM);
     gl.uniformMatrix4fv(u_WorldMatrix, false, wM);
     gl.uniformMatrix4fv(u_NormalMatrix, false, nM);
+    gl.uniform1f(u_time, time);
 
 }
 
@@ -156,9 +191,9 @@ const lightUp = (gl: WebGL2RenderingContext, program: WebGLProgram, lightColor: 
     const u_LightColor = gl.getUniformLocation(program, "u_LightColor");
     const u_LightPosition = gl.getUniformLocation(program, "u_LightPosition");
     const u_AmbientColor = gl.getUniformLocation(program, "u_AmbientColor");
-    const Noise = gl.getUniformLocation(program, "Noise");
+    const u_resoslution = gl.getUniformLocation(program, "u_resoslution");
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
     gl.uniform3f(u_LightPosition, 10.0, 8.0, 0.0);
     gl.uniform3f(u_AmbientColor, 0.1, 0.1, 0.1);
-    gl.uniform1f(Noise, 0);
+    gl.uniform2f(u_resoslution, gl.canvas.width, gl.canvas.height);
 };

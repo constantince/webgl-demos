@@ -28,7 +28,7 @@ const setMPA = () => {
     console.log(entry);
     return {
         entry: {
-            lab: "./src/lab/index.tsx"
+            "picking-objects": "./src/picking-objects/index.tsx"
         },
         // entry,
         plugins
