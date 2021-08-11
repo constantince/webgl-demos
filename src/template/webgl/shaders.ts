@@ -14,6 +14,9 @@ export const vertexShader = `#version 300 es
 
 export const fragmentShader = `#version 300 es
     precision mediump float;
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform vec2 u_mouse;
     in vec4 v_Color;
     out vec4 FragColor;
     uniform bool f_Line;
