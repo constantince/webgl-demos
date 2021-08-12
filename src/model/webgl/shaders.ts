@@ -35,20 +35,13 @@ export const fragmentShader = `#version 300 es
     uniform sampler2D u_texture;
 
     void main() {
-        vec3 col = vec3(1.0);
+        vec3 col = v_Color.rgb;
         vec3 t = v_texturePosition.xyz / v_texturePosition.w;
 
-        bool iRange = t.x >= 0.0 && t.x <= 1.0 && t.y >= 0.0 && t.y <= 1.0;
+        bool inRange = t.x >= 0.0 && t.x <= 1.0 && t.y >= 0.0 && t.y <= 1.0;
         vec3 col2 = texture(u_texture, t.xy).rgb;
-        if(iRange) {
-            FragColor = vec4(col2, 1.0);
-        } else {
-            FragColor = vec4(col, 1.0);
-        }
-        // float i = iRange ? 1.0 : 0.0;
-       
-
-        // // FragColor = vec4(mix(col, col2, i), 1.0);
-        // FragColor = vec4(col2, 1.0);
+        float projectedAmount = inRange ? 1.0 : 0.0;
+        FragColor = vec4(mix(col, col2, projectedAmount), 1.0);
+        // FragColor = vec4(1.0);
     }
 `;

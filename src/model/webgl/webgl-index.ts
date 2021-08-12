@@ -11,15 +11,28 @@ import { vertexShader, fragmentShader} from "./shaders";
 const w:any = window;
 const PLANESIZE = 5;
 
+const settings = {
+    cameraX: 1.75,
+    cameraY: 5,
+    posX: w.x,
+    posY: w.y,
+    posZ: w.z,
+    targetX: 0.8,
+    targetY: 0,
+    targetZ: .7,
+    projWidth: 1,
+    projHeight: 1,
+  };
+
 function createMatrix(webgl:WebGL2RenderingContext, canvas: HTMLCanvasElement, program: WebGLProgram, camera: vec3) {
     const vM = mat4.create();
     mat4.identity(vM);
-    mat4.perspective(vM, glMatrix.toRadian(30), canvas.width / canvas.height, 1, 100);
+    mat4.perspective(vM, glMatrix.toRadian(60), canvas.width / canvas.height, 1, 100);
 
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, camera, [0.0, 0, 0.0], [0, 1.0, 0]);
-
+    mat4.lookAt(lM, camera, [0.0, 0.0, 0.0], [0, 1.0, 0]);
+    // mat4.invert(lM, lM);
     // mat4.mul(vM, vM, lM);
 
     const m = webgl.getUniformLocation(program, "u_ProjectionMatrix");
@@ -32,13 +45,20 @@ function createMatrix(webgl:WebGL2RenderingContext, canvas: HTMLCanvasElement, p
 }
 
 function _createBuffer(gl: WebGL2RenderingContext, program: WebGLProgram, name: string, data: Float32Array) {
+    
     const buffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-    const target = gl.getAttribLocation(program, name);
+    const size = data.BYTES_PER_ELEMENT;
 
-    gl.vertexAttribPointer(target, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(target);
+    const a_Position = gl.getAttribLocation(program, "a_Position");
+    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, size * 6, size * 0);
+    gl.enableVertexAttribArray(a_Position);
+
+    const a_Color = gl.getAttribLocation(program, "a_Color");
+    gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, size * 6, size * 3);
+    gl.enableVertexAttribArray(a_Color);
+
 }
 
 function createTexture(gl: WebGL2RenderingContext, program: WebGLProgram, url: string, render: {(): void}) {
@@ -59,8 +79,8 @@ function createTexture(gl: WebGL2RenderingContext, program: WebGLProgram, url: s
       // assumes this texture is a power of 2
       gl.generateMipmap(gl.TEXTURE_2D);
 
-      const target = gl.getUniformLocation(program, "u_texture");
-      gl.uniform1f(target, 0);
+    //   const target = gl.getUniformLocation(program, "u_texture");
+    //   gl.uniform1f(target, 0);
       render();
     });
     return texture;
@@ -75,25 +95,93 @@ function _createFMatrix(webgl:WebGL2RenderingContext, canvas: HTMLCanvasElement,
 
     const lM = mat4.create();
     mat4.identity(lM);
-    mat4.lookAt(lM, [2.75, 5.0, 2.0], [2.5, 4.8, 4.3], [2.5, 1.0, 3.0]);
-
-    const textureMatrix = mat4.mul(
-        vM,
-        vM,
-        lM
+    mat4.lookAt(lM,
+        [w.x, w.y, w.z],          // position
+        [w.targetX, w.targetY, w.targetZ], // target
+        [0, 1, 0]
     );
 
+    mat4.scale(lM, lM, [settings.projWidth, settings.projHeight, 1]);
+
+    mat4.mul(lM, vM, lM);
     const m = webgl.getUniformLocation(program, "u_textureMatrix");
-    webgl.uniformMatrix4fv(m, false, textureMatrix);
+    webgl.uniformMatrix4fv(m, false, lM);
 
 }
 
 const paneVertex = new Float32Array([
-    -1.0, 0.0, -1.0,
-    -1.0, 0.0, 1.0,
-    1.0, 0.0, -1.0,
-    1.0, 0.0, 1.0
+    -5.0, -5.0, -5.0, 1.0, 1.0, 1.0,
+    -5.0, -5.0, 5.0, 1.0, 1.0, 1.0,
+    5.0, -5.0, -5.0, 1.0, 1.0, 1.0,
+    5.0, -5.0, 5.0, 1.0, 1.0, 1.0
 ]);
+
+function initVertexBuffers(gl: WebGL2RenderingContext, program: WebGLProgram) {
+    // Create a cube
+    //    v6----- v5
+    //   /|      /|
+    //  v1------v0|
+    //  | |     | |
+    //  | |v7---|-|v4
+    //  |/      |/
+    //  v2------v3
+    var verticesColors = new Float32Array([
+      // Vertex coordinates and color
+       1.0,  1.0,  1.0,     1.0,  1.0,  1.0,  // v0 White
+      -1.0,  1.0,  1.0,     1.0,  0.0,  1.0,  // v1 Magenta
+      -1.0, -1.0,  1.0,     1.0,  0.0,  0.0,  // v2 Red
+       1.0, -1.0,  1.0,     1.0,  1.0,  0.0,  // v3 Yellow
+       1.0, -1.0, -1.0,     0.0,  1.0,  0.0,  // v4 Green
+       1.0,  1.0, -1.0,     0.0,  1.0,  1.0,  // v5 Cyan
+      -1.0,  1.0, -1.0,     0.0,  0.0,  1.0,  // v6 Blue
+      -1.0, -1.0, -1.0,     0.0,  0.0,  0.0   // v7 Black
+    ]);
+  
+    // Indices of the vertices
+    var indices = new Uint16Array([
+      0, 1, 2,   0, 2, 3,    // front
+      0, 3, 4,   0, 4, 5,    // right
+      0, 5, 6,   0, 6, 1,    // up
+      1, 6, 7,   1, 7, 2,    // left
+      7, 4, 3,   7, 3, 2,    // down
+      4, 7, 6,   4, 6, 5     // back
+   ]);
+  
+    // Create a buffer object
+    var vertexColorBuffer = gl.createBuffer();
+    var indexBuffer = gl.createBuffer();
+    if (!vertexColorBuffer || !indexBuffer) {
+      return -1;
+    }
+  
+    // Write the vertex coordinates and color to the buffer object
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, verticesColors, gl.STATIC_DRAW);
+  
+    var FSIZE = verticesColors.BYTES_PER_ELEMENT;
+    // Assign the buffer object to a_Position and enable the assignment
+    var a_Position = gl.getAttribLocation(program, 'a_Position');
+    if(a_Position < 0) {
+      console.log('Failed to get the storage location of a_Position');
+      return -1;
+    }
+    gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, FSIZE * 6, 0);
+    gl.enableVertexAttribArray(a_Position);
+    // Assign the buffer object to a_Color and enable the assignment
+    var a_Color = gl.getAttribLocation(program, 'a_Color');
+    if(a_Color < 0) {
+      console.log('Failed to get the storage location of a_Color');
+      return -1;
+    }
+    gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
+    gl.enableVertexAttribArray(a_Color);
+  
+    // Write the indices to the buffer object
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  
+    return indices.length;
+}
 
 export function main(id: string) {
     const canvas = <HTMLCanvasElement>document.getElementById(id);
@@ -114,17 +202,25 @@ export function main(id: string) {
     });
     
     var tick = (time:number) => {
-        time *= 0.001;
-        const u_CameraPositionValue = vec3.fromValues(Math.cos(time * .1) * 2, 1, Math.sin(time * .1) * 2);
+        time *= 0.0001;
+        // const u_CameraPositionValue = vec3.fromValues(settings.cameraX, settings.cameraY, 7);
+        const u_CameraPositionValue = vec3.fromValues(Math.cos(time) * 5, 5, Math.sin(time) * 5);
         resizeCanvasToDisplaySize(canvas);
         webgl.viewport(0, 0, webgl.canvas.width, webgl.canvas.height);
         webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
-
+       
         _createBuffer(webgl, program, "a_Position", paneVertex);
         const [vM, lM] = createMatrix(webgl, canvas, program, u_CameraPositionValue);
         
         _createFMatrix(webgl, canvas, program, [vM, lM])
         webgl.drawArrays(webgl.TRIANGLE_STRIP, 0, 4);
+
+
+
+       
+        const n = initVertexBuffers(webgl, program);
+        webgl.drawElements(webgl.TRIANGLES, n, webgl.UNSIGNED_SHORT, 0);
+
         window.requestAnimationFrame(tick);
     }
     // setTimeout(() => {
