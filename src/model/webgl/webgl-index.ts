@@ -110,10 +110,10 @@ function _createFMatrix(webgl:WebGL2RenderingContext, canvas: HTMLCanvasElement,
 }
 
 const paneVertex = new Float32Array([
-    -5.0, -5.0, -5.0, 1.0, 1.0, 1.0,
-    -5.0, -5.0, 5.0, 1.0, 1.0, 1.0,
-    5.0, -5.0, -5.0, 1.0, 1.0, 1.0,
-    5.0, -5.0, 5.0, 1.0, 1.0, 1.0
+    -5.0, -1.0, -5.0, 1.0, 1.0, 1.0,
+    -5.0, -1.0, 5.0, 1.0, 1.0, 1.0,
+    5.0, -1.0, -5.0, 1.0, 1.0, 1.0,
+    5.0, -1.0, 5.0, 1.0, 1.0, 1.0
 ]);
 
 function initVertexBuffers(gl: WebGL2RenderingContext, program: WebGLProgram) {
@@ -202,9 +202,9 @@ export function main(id: string) {
     });
     
     var tick = (time:number) => {
-        time *= 0.0001;
+        // time *= 0.0001;
         // const u_CameraPositionValue = vec3.fromValues(settings.cameraX, settings.cameraY, 7);
-        const u_CameraPositionValue = vec3.fromValues(Math.cos(time) * 5, 5, Math.sin(time) * 5);
+        const u_CameraPositionValue = vec3.fromValues(5, 5, 5);
         resizeCanvasToDisplaySize(canvas);
         webgl.viewport(0, 0, webgl.canvas.width, webgl.canvas.height);
         webgl.clear(webgl.COLOR_BUFFER_BIT | webgl.DEPTH_BUFFER_BIT);
@@ -221,8 +221,10 @@ export function main(id: string) {
         const n = initVertexBuffers(webgl, program);
         webgl.drawElements(webgl.TRIANGLES, n, webgl.UNSIGNED_SHORT, 0);
 
-        window.requestAnimationFrame(tick);
+        // window.requestAnimationFrame(tick);
     }
+
+    return tick;
     // setTimeout(() => {
        
     // }, 2000)

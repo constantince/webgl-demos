@@ -4,6 +4,7 @@ import "../common/common.scss";
 import Articles from "../comps/new-scene";
 import { main } from "./webgl/webgl-index";
 import SwithBtn from "../comps/switch-btn";
+import { useEffect } from "react";
 const w:any = window;
 w.x = 2;
 w.y = 2;
@@ -15,6 +16,7 @@ w.targetZ = 0.5;
 
 
 type Postion = "x" | "y" | "z" | "targetX" | "targetY" | "targetZ";
+type TICKER =  {(time: number): void};
 // type Target = "m" | "n" | "l";
 const App: React.FC = props => {
     const [positionX, setPX] = useState("0.5");
@@ -24,13 +26,18 @@ const App: React.FC = props => {
     const [targetX, setTX] = useState("0.5");
     const [targetY, setTY] = useState("0.5");
     const [targetZ, setTZ] = useState("0.5");
+    let tick: TICKER;
+    useEffect(() => {
+        tick = main("template") as TICKER;
+    }, []);
+   
     function changeLight(type: Postion, value: string) {
         w[type] = Number(value);
     }
 
 
     return <div className="container"> 
-        <Articles id="template" main={main} >
+        <Articles id="template" >
         <div>
         <SwithBtn href="https://github.com/constantince" />
                 <p>Position</p>
@@ -38,24 +45,24 @@ const App: React.FC = props => {
                     <div>
                         X: 
                         <input type="range" step={0.1} max="20" defaultValue="2" min="0" onChange={(e) => {
-                            changeLight("x", e.target.value);
-                            setPX(e.target.value);
+                            w["x"] = Number(e.target.value);
+                            window.requestAnimationFrame(tick);
                         }} />
                         { positionX }
                     </div>
                     <div>
                         Y:
                         <input type="range" step={0.1} max="20" defaultValue="2" min="0" onChange={(e) => {
-                            changeLight("y", e.target.value);
-                            setPY(e.target.value);
+                             w["y"] = Number(e.target.value);
+                            window.requestAnimationFrame(tick);
                         }} />
                         { positionY }
                     </div>
                     <div>
                         Z:
                         <input type="range" step={0.1} max="20" defaultValue="2" min="0" onChange={(e) => {
-                            changeLight("z", e.target.value);
-                            setPZ(e.target.value);
+                             w["z"] = Number(e.target.value);
+                            window.requestAnimationFrame(tick);
                         }} />
                         { positionZ }
                     </div>
@@ -63,8 +70,8 @@ const App: React.FC = props => {
                     <div>
                         targetX: 
                         <input type="range" step={0.1} max="10" defaultValue="0.5" min="-10" onChange={(e) => {
-                            changeLight("targetX", e.target.value);
-                            setTX(e.target.value);
+                             w["targetX"] = Number(e.target.value);
+                            window.requestAnimationFrame(tick);
                         }} />
                         { targetX }
                     </div>
@@ -72,8 +79,8 @@ const App: React.FC = props => {
                     <div>
                         targetY: 
                         <input type="range" step={0.1} max="10" defaultValue="0.5" min="-10" onChange={(e) => {
-                            changeLight("targetY", e.target.value);
-                            setTY(e.target.value);
+                             w["targetY"] = Number(e.target.value);
+                            window.requestAnimationFrame(tick);
                         }} />
                         { targetY }
                     </div>
@@ -81,8 +88,8 @@ const App: React.FC = props => {
                     <div>
                         targetZ: 
                         <input type="range" step={0.1} max="10" defaultValue="0.5" min="-10" onChange={(e) => {
-                            changeLight("targetZ", e.target.value);
-                            setTZ(e.target.value);
+                             w["targetZ"] = Number(e.target.value);
+                            window.requestAnimationFrame(tick);
                         }} />
                         { targetZ }
                     </div>
