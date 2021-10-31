@@ -1,10 +1,11 @@
-import { InitDraggingAction, translateToWebglColor, resizeCanvasToDisplaySize, rotation } from "../../common/base";
+import { InitDraggingAction, translateToWebglColor, resizeCanvasToDisplaySize, rotation, initShader } from "../../common/base";
 import { createPane } from "../../common/scene";
 import { makeCube } from "../../common/creator";
 import { Objects, ViewerIntheSameScene } from "../../common/factory";
 import { glMatrix, mat4, vec3 } from "gl-matrix";
 import webglImage from "../../images/webgl.png";
 import cloudOnSky from "../../images/sky_cloud.jpg";
+import {vertexShader, fragmentShader} from "./shaders";
 const w:any = window;
 const PLANESIZE = 5;
 
@@ -32,8 +33,11 @@ export function main(id: string) {
     webgl.enable(webgl.POLYGON_OFFSET_FILL);
     webgl.enable(webgl.CULL_FACE);
 
+    const program = initShader(webgl, vertexShader, fragmentShader);
     
-    const drawPane = createPane(canvas, webgl, PLANESIZE, null);
+    if( !program ) return;
+
+    const drawPane = createPane(canvas, program, webgl, PLANESIZE, null);
     const webglBox = new Objects(webgl, canvas, 'sphere')
     .position([0, 0.1, 0])
     .scale([0.1, 0.1, 0.1])

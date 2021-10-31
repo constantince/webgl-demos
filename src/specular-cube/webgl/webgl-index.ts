@@ -1,8 +1,9 @@
-import { InitDraggingAction, translateToWebglColor, resizeCanvasToDisplaySize, rotation } from "../../common/base";
+import { InitDraggingAction, translateToWebglColor, resizeCanvasToDisplaySize, rotation, initShader } from "../../common/base";
 import { createPane } from "../../common/scene";
 import { makeCube } from "../../common/creator";
 import { Objects, ViewerIntheSameScene } from "../../common/factory";
 import { glMatrix, mat4, vec3 } from "gl-matrix";
+import {vertexShader, fragmentShader} from "./shaders";
 const PLANESIZE = 5;
 
 function createMatrix(canvas: HTMLCanvasElement) {
@@ -29,8 +30,9 @@ export function main(id: string) {
     webgl.enable(webgl.POLYGON_OFFSET_FILL);
     webgl.enable(webgl.CULL_FACE);
 
-    
-    const drawPane = createPane(canvas, webgl, PLANESIZE, null);
+    const program = initShader(webgl, vertexShader, fragmentShader);
+    if( !program ) return;
+    const drawPane = createPane(canvas, program, webgl, PLANESIZE, null);
     const webglBox = new Objects(webgl, canvas, 'cube')
     .position([0, 0.1, 0])
     .scale([0.3, 0.3, 0.3])

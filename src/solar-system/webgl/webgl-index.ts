@@ -217,7 +217,7 @@ export function main(id: string) {
 
    setTimeout(() => {
     window.requestAnimationFrame(tick);
-   }, 0);
+   }, 100);
     // window.requestAnimationFrame(tick);
     
 

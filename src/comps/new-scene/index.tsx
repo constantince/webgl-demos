@@ -3,17 +3,17 @@ import "./index.scss";
 type Props = {
     height?: number,
     width?: number,
-    // main: {
-    //     (id: string, func?: string) : void
-    // },
+    main: {
+        (id: string, func?: string) : void
+    },
     id: string,
     children?: JSX.Element
 }
 
-const CanvasArea: React.FC<Props> = ({id, children}) => {
+const CanvasArea: React.FC<Props> = ({id, main, children}) => {
 
     useEffect(() => {
-        // main(id);
+        main(id);
     },[])
 
     return <div className="new-scence">

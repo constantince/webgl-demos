@@ -27,9 +27,9 @@ const App: React.FC = props => {
     const [targetY, setTY] = useState("0.5");
     const [targetZ, setTZ] = useState("0.5");
     let tick: TICKER;
-    useEffect(() => {
-        tick = main("template") as TICKER;
-    }, []);
+    // useEffect(() => {
+    //     tick = main("template") as TICKER;
+    // }, []);
    
     function changeLight(type: Postion, value: string) {
         w[type] = Number(value);
@@ -37,7 +37,7 @@ const App: React.FC = props => {
 
 
     return <div className="container"> 
-        <Articles id="template" >
+        <Articles main={main} id="template" >
         <div>
         <SwithBtn href="https://github.com/constantince" />
                 <p>Position</p>

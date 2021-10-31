@@ -27,10 +27,10 @@ const setMPA = () => {
     });
     console.log(entry);
     return {
-        entry: {
-            "model": "./src/model/index.tsx"
-        },
-        // entry,
+        // entry: {
+        //     "model": "./src/model/index.tsx"
+        // },
+        entry,
         plugins
     }
 }
