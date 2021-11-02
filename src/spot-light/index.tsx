@@ -28,7 +28,6 @@ const App: React.FC = props => {
                 </form>
             </div>
         </Articles>
-        <p>source code: <a></a></p>
         <footer className="footer-desc">Power up by Typescript, Webpack and Webgl2 </footer>
     </div>
 };

@@ -82,7 +82,7 @@ export function main(id: string) {
 }
 
 function createMatrix(webgl:WebGL2RenderingContext, program: WebGLProgram, time: number): mat4 {
-    const u_CameraPositionValue = vec3.fromValues(Math.cos(time * .1) * 2, 0, Math.sin(time * .1) * 2);
+    const u_CameraPositionValue = vec3.fromValues(Math.cos(time * .1) * 7, 0, Math.sin(time * .1) * 7);
     const u_ProjectionMatrix = webgl.getUniformLocation(program, "u_ProjectionMatrix");
 
     const  pM = mat4.create();
